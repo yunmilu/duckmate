@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DUCKZ — 최종 덕질 플랫폼</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            yellow: '#FEF9C3',
+                            pink: '#FCE7F3',
+                            blue: '#E0F2FE',
+                            purple: '#F3E8FF',
+                            green: '#DCFCE7',
+                            peach: '#FFEDD5'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .custom-scrollbar::-webkit-scrollbar { width: 3px; height: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-slate-200 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex justify-center items-start transition-colors duration-300 text-xs py-0 sm:py-4">
+
+    <!-- MOBILE APP FRAME -->
+    <div id="app-frame" class="w-full max-w-md min-h-screen sm:min-h-[880px] sm:max-h-[92vh] bg-slate-50 dark:bg-slate-900 shadow-2xl sm:rounded-3xl flex flex-col relative overflow-hidden border-x sm:border border-pink-200 dark:border-slate-800">
+
+        <!-- Custom Modal Container -->
+        <div id="custom-modal" class="absolute inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+            <div id="modal-content" class="bg-white dark:bg-slate-800 rounded-3xl p-5 max-w-xs w-full shadow-2xl border border-pink-100 dark:border-slate-700 transform transition-all max-h-[85vh] overflow-y-auto custom-scrollbar">
+                <!-- Dynamic Modal Content -->
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="absolute top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 dark:bg-slate-800/95 text-white px-4 py-2 rounded-2xl shadow-xl flex items-center space-x-2 transform -translate-y-10 opacity-0 transition-all duration-300 pointer-events-none text-[11px] backdrop-blur-xs">
+            <span id="toast-icon">✨</span>
+            <span id="toast-msg" class="font-medium">메시지</span>
+        </div>
+
+        <!-- TOP HEADER (2 Rows) -->
+        <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-pink-100/80 dark:border-slate-800 shadow-xs">
+            <!-- Row 1: Logo, Points, Profile, Three-Dot Menu -->
+            <div class="px-4 h-12 flex items-center justify-between">
+                <div class="flex items-center space-x-2 cursor-pointer" onclick="switchTab('home')">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-400 to-pink-400 flex items-center justify-center shadow-xs animate-float text-base">
+                        🦆
+                    </div>
+                    <div>
+                        <span class="text-base font-extrabold bg-gradient-to-r from-amber-500 to-pink-500 bg-clip-text text-transparent tracking-wider">DUCKZ</span>
+                        <span class="text-[9px] bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-300 px-1.5 py-0.2 rounded-full font-bold ml-1">2026</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-1.5">
+                    <!-- Points Badge -->
+                    <div onclick="switchTab('ranking')" class="flex items-center space-x-1 bg-amber-100/80 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 px-2 py-1 rounded-full text-[11px] font-bold cursor-pointer hover:scale-105 transition">
+                        <i data-lucide="coins" class="w-3 h-3 text-amber-500"></i>
+                        <span id="header-points">1,500 P</span>
+                    </div>
+
+                    <!-- Profile Button -->
+                    <button onclick="openMyProfileModal()" class="w-7 h-7 rounded-full bg-pink-100 dark:bg-slate-800 flex items-center justify-center text-pink-600 dark:text-pink-300 hover:bg-pink-200 transition shadow-xs">
+                        <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                    </button>
+
+                    <!-- Three-Dot Menu Button -->
+                    <div class="relative">
+                        <button onclick="toggleThreeDotMenu()" class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">
+                            <i data-lucide="more-vertical" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <!-- Dropdown -->
+                        <div id="threedot-dropdown" class="absolute right-0 mt-2 w-44 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 py-2 hidden z-50 text-[11px]">
+                            <button onclick="openBiasAddModal()" class="w-full text-left px-3.5 py-2 hover:bg-pink-50 dark:hover:bg-slate-700/50 flex items-center space-x-2 text-slate-700 dark:text-slate-200">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-pink-500"></i>
+                                <span>최애 직접 추가</span>
+                            </button>
+                            <button onclick="openPhotoModal()" class="w-full text-left px-3.5 py-2 hover:bg-pink-50 dark:hover:bg-slate-700/50 flex items-center space-x-2 text-slate-700 dark:text-slate-200">
+                                <i data-lucide="image" class="w-3.5 h-3.5 text-purple-500"></i>
+                                <span>포토앨범 사진 등록</span>
+                            </button>
+                            <button onclick="openMyProfileModal()" class="w-full text-left px-3.5 py-2 hover:bg-pink-50 dark:hover:bg-slate-700/50 flex items-center space-x-2 text-slate-700 dark:text-slate-200">
+                                <i data-lucide="user-cog" class="w-3.5 h-3.5 text-amber-500"></i>
+                                <span>내 프로필 관리</span>
+                            </button>
+                            <button onclick="openBackupModal()" class="w-full text-left px-3.5 py-2 hover:bg-pink-50 dark:hover:bg-slate-700/50 flex items-center space-x-2 text-slate-700 dark:text-slate-200">
+                                <i data-lucide="database" class="w-3.5 h-3.5 text-blue-500"></i>
+                                <span>데이터 백업/복원</span>
+                            </button>
+                            <button onclick="resetAllDataConfirm()" class="w-full text-left px-3.5 py-2 hover:bg-red-50 dark:hover:bg-slate-700/50 flex items-center space-x-2 text-red-500">
+                                <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                                <span>데이터 초기화</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Direct Main Navigation Tabs (9 Tabs) -->
+            <div class="border-t border-slate-100 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60">
+                <nav class="flex space-x-1 overflow-x-auto px-2 py-1.5 custom-scrollbar font-medium text-[11px]" id="main-nav">
+                    <button onclick="switchTab('home')" class="nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-pink-600 bg-pink-50 dark:bg-pink-950/40 dark:text-pink-300 font-bold" data-tab="home">
+                        <i data-lucide="home" class="w-3 h-3"></i><span>홈</span>
+                    </button>
+                    <button onclick="switchTab('bias')" class="nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-tab="bias">
+                        <i data-lucide="heart" class="w-3 h-3"></i><span>최애</span>
+                    </button>
+                    <button onclick="switchTab('album')" class="nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-tab="album">
+                        <i data-lucide="image" class="w-3 h-3"></i><span>포토앨범</span>
+                    </button>
+                    <button onclick="switchTab('concert')" class="nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-tab="concert">
+                        <i data-lucide="ticket" class="w-3 h-3"></i><span>콘서트</span>
+                    </button>
+                    <button onclick="switchTab('playlist')" class="nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-tab="playlist">
+                        <i data-lucide="music" class="w-3 h-3"></i><span>플리</span>
+                    </button>
+                    <button onclick="switchTab('mission')" class="nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-tab="mission">
+                        <i data-lucide="sparkles" class="w-3 h-3"></i><span>미션</span>
+                    </button>
+                    <button onclick="switchTab('ranking')" class="nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-tab="ranking">
+                        <i data-lucide="trophy" class="w-3 h-3"></i><span>랭킹</span>
+                    </button>
+                    <button onclick="switchTab('test')" class="nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-tab="test">
+                        <i data-lucide="help-circle" class="w-3 h-3"></i><span>테스트</span>
+                    </button>
+                    <button onclick="switchTab('theme')" class="nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-tab="theme">
+                        <i data-lucide="palette" class="w-3 h-3"></i><span>테마</span>
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- MAIN APP CONTENT (Scrollable body) -->
+        <main class="flex-1 overflow-y-auto px-4 py-4 space-y-5 pb-16 custom-scrollbar">
+
+            <!-- ================= TAB 1: HOME ================= -->
+            <div id="tab-home" class="tab-content space-y-4">
+                <!-- 1. 오늘의 인사말 -->
+                <div class="bg-gradient-to-r from-pink-100 via-amber-50 to-blue-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 shadow-xs border border-pink-100/50 dark:border-slate-700 flex items-center justify-between">
+                    <div class="space-y-1">
+                        <span class="text-[9px] bg-white/80 dark:bg-slate-800 text-pink-600 dark:text-pink-300 font-bold px-2 py-0.5 rounded-full shadow-xs">🦆 DUCKZ 모바일</span>
+                        <h1 class="text-sm font-extrabold text-slate-800 dark:text-white">오늘도 최애와 함께 ✨</h1>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300">포토앨범과 플레이리스트를 즐기세요!</p>
+                    </div>
+                    <button onclick="openBiasAddModal()" class="px-3 py-2 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl shadow-xs text-[11px] flex items-center space-x-1">
+                        <i data-lucide="plus" class="w-3 h-3"></i><span>최애등록</span>
+                    </button>
+                </div>
+
+                <!-- 2. 대표 최애 프로필 -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-bold flex items-center space-x-1 text-[11px]">
+                            <i data-lucide="star" class="w-3.5 h-3.5 text-amber-500 fill-amber-400"></i>
+                            <span>대표 최애 프로필</span>
+                        </h2>
+                        <button onclick="switchTab('bias')" class="text-[10px] text-pink-600 dark:text-pink-400 font-semibold">전체보기 &rarr;</button>
+                    </div>
+                    <div id="rep-bias-card" class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-xs border border-pink-50 dark:border-slate-700 flex items-center gap-3">
+                        <!-- Rendered via JS -->
+                    </div>
+                </section>
+
+                <!-- 3. 오늘의 랜덤 최애 뽑기 (포토앨범 연동 + 24시간당 3회 제한) -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-bold flex items-center space-x-1 text-[11px]">
+                            <i data-lucide="gift" class="w-3.5 h-3.5 text-pink-500"></i>
+                            <span>오늘의 랜덤 포토 뽑기</span>
+                        </h2>
+                        <span id="draw-limit-indicator" class="text-[10px] font-bold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-pink-100 dark:border-slate-700">남은 횟수: 3/3회</span>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-pink-50 dark:border-slate-700 text-center space-y-2.5">
+                        <div class="w-10 h-10 mx-auto bg-pink-50 dark:bg-slate-700 rounded-full flex items-center justify-center text-xl animate-bounce">
+                            🎁
+                        </div>
+                        <h3 class="font-bold text-slate-800 dark:text-white text-[11px]">포토앨범 속 랜덤 사진 뽑고 포인트 획득!</h3>
+                        <button onclick="executeRandomDraw()" class="px-4 py-2 bg-gradient-to-r from-pink-500 to-amber-500 text-white font-bold rounded-xl shadow-xs text-[11px]">
+                            행운의 포토 뽑기 🌟
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 4. 보유 포인트 & 5. 오늘의 덕질 미션 -->
+                <div class="grid grid-cols-2 gap-3">
+                    <section class="space-y-2">
+                        <h2 class="font-bold flex items-center space-x-1 text-[11px]">
+                            <i data-lucide="coins" class="w-3.5 h-3.5 text-amber-500"></i>
+                            <span>보유 포인트</span>
+                        </h2>
+                        <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-pink-50 dark:border-slate-700 flex flex-col justify-between h-24">
+                            <div>
+                                <span class="text-[10px] text-slate-400">덕질 포인트</span>
+                                <div class="text-base font-extrabold text-amber-500 mt-0.5" id="home-points-val">1,500 P</div>
+                            </div>
+                            <button onclick="openPointHistoryModal()" class="w-full py-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 text-[10px] font-bold rounded-xl text-center">
+                                내역 보기
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <h2 class="font-bold flex items-center space-x-1 text-[11px]">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-pink-500"></i>
+                                <span>덕질 미션</span>
+                            </h2>
+                            <button onclick="switchTab('mission')" class="text-[10px] text-pink-600 font-semibold">더보기</button>
+                        </div>
+                        <div id="home-missions-list" class="bg-white dark:bg-slate-800 rounded-2xl p-2.5 shadow-xs border border-pink-50 dark:border-slate-700 space-y-1.5 h-24 overflow-y-auto custom-scrollbar">
+                            <!-- Rendered via JS -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- 6. 최근 콘서트 추억 -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-bold flex items-center space-x-1 text-[11px]">
+                            <i data-lucide="ticket" class="w-3.5 h-3.5 text-purple-500"></i>
+                            <span>최근 콘서트 추억</span>
+                        </h2>
+                        <button onclick="switchTab('concert')" class="text-[10px] text-pink-600 font-semibold">기록하기 &rarr;</button>
+                    </div>
+                    <div id="home-concerts-grid" class="space-y-2">
+                        <!-- Rendered via JS -->
+                    </div>
+                </section>
+
+                <!-- 7. 아이돌 응원 랭킹 -->
+                <section class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-bold flex items-center space-x-1 text-[11px]">
+                            <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-500"></i>
+                            <span>응원 랭킹 TOP</span>
+                        </h2>
+                        <button onclick="switchTab('ranking')" class="text-[10px] text-pink-600 font-semibold">전체 랭킹</button>
+                    </div>
+                    <div id="home-ranking-preview" class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-pink-50 dark:border-slate-700 space-y-2">
+                        <!-- Rendered via JS -->
+                    </div>
+                </section>
+
+                <!-- 8. 최애곡 플레이리스트 (하단 독립 영역 - YouTube 연동) -->
+                <section class="space-y-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-1">
+                            <i data-lucide="music" class="w-4 h-4 text-pink-500"></i>
+                            <h2 class="text-xs font-bold">최애곡 플레이리스트</h2>
+                        </div>
+                        <div class="flex space-x-1">
+                            <button onclick="openSongModal()" class="px-2.5 py-1 bg-pink-500 text-white text-[10px] font-bold rounded-xl shadow-xs">곡 추가</button>
+                            <button onclick="switchTab('playlist')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-bold rounded-xl">전체</button>
+                        </div>
+                    </div>
+                    <div id="home-playlist-area" class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-pink-50 dark:border-slate-700 space-y-2">
+                        <!-- Rendered via JS -->
+                    </div>
+                </section>
+            </div>
+
+
+            <!-- ================= TAB 2: BIAS MANAGEMENT ================= -->
+            <div id="tab-bias" class="tab-content space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-sm font-extrabold flex items-center space-x-1">
+                            <i data-lucide="heart" class="w-4 h-4 text-pink-500 fill-pink-400"></i>
+                            <span>최애 프로필 관리</span>
+                        </h1>
+                        <p class="text-[10px] text-slate-400">내가 직접 등록하고 관리하는 최애 아티스트</p>
+                    </div>
+                    <button onclick="openBiasAddModal()" class="px-3 py-1.5 bg-pink-500 text-white font-bold rounded-xl shadow-xs text-[11px] flex items-center space-x-1">
+                        <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i><span>직접 추가</span>
+                    </button>
+                </div>
+
+                <div id="bias-list-container" class="space-y-3">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+
+            <!-- ================= TAB 3: PHOTO ALBUM ================= -->
+            <div id="tab-album" class="tab-content space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-sm font-extrabold flex items-center space-x-1">
+                            <i data-lucide="image" class="w-4 h-4 text-purple-500"></i>
+                            <span>덕질 포토앨범</span>
+                        </h1>
+                        <p class="text-[10px] text-slate-400">나만의 최애 사진과 포토카드 아카이브</p>
+                    </div>
+                    <button onclick="openPhotoModal()" class="px-3 py-1.5 bg-purple-500 text-white font-bold rounded-xl shadow-xs text-[11px] flex items-center space-x-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i><span>사진 등록</span>
+                    </button>
+                </div>
+
+                <div id="album-grid-container" class="grid grid-cols-2 gap-2.5">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+
+            <!-- ================= TAB 4: CONCERT ================= -->
+            <div id="tab-concert" class="tab-content space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-sm font-extrabold flex items-center space-x-1">
+                            <i data-lucide="ticket" class="w-4 h-4 text-purple-500"></i>
+                            <span>콘서트 추억 기록</span>
+                        </h1>
+                        <p class="text-[10px] text-slate-400">직관했던 공연의 추억과 티켓 후기</p>
+                    </div>
+                    <button onclick="openConcertModal()" class="px-3 py-1.5 bg-purple-500 text-white font-bold rounded-xl shadow-xs text-[11px] flex items-center space-x-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i><span>기록 추가</span>
+                    </button>
+                </div>
+
+                <div id="concert-list-container" class="space-y-3">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+
+            <!-- ================= TAB 5: PLAYLIST ================= -->
+            <div id="tab-playlist" class="tab-content space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-sm font-extrabold flex items-center space-x-1">
+                            <i data-lucide="music" class="w-4 h-4 text-pink-500"></i>
+                            <span>유튜브 플레이리스트</span>
+                        </h1>
+                        <p class="text-[10px] text-slate-400">일반 유튜브(YouTube)와 연동되는 곡 목록</p>
+                    </div>
+                    <button onclick="openSongModal()" class="px-3 py-1.5 bg-pink-500 text-white font-bold rounded-xl shadow-xs text-[11px] flex items-center space-x-1">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i><span>새 곡</span>
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="flex space-x-1.5 overflow-x-auto pb-1 custom-scrollbar text-[11px]" id="playlist-category-filters">
+                    <button onclick="filterPlaylist('all')" class="playlist-filter-btn px-3 py-1 rounded-xl font-bold bg-pink-500 text-white whitespace-nowrap">전체</button>
+                    <button onclick="filterPlaylist('title')" class="playlist-filter-btn px-3 py-1 rounded-xl font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap">타이틀</button>
+                    <button onclick="filterPlaylist('b-side')" class="playlist-filter-btn px-3 py-1 rounded-xl font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap">수록곡</button>
+                    <button onclick="filterPlaylist('ost')" class="playlist-filter-btn px-3 py-1 rounded-xl font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap">OST</button>
+                    <button onclick="filterPlaylist('favorite')" class="playlist-filter-btn px-3 py-1 rounded-xl font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap">⭐ 즐겨찾기</button>
+                </div>
+
+                <div id="playlist-full-container" class="space-y-2.5">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+
+            <!-- ================= TAB 6: MISSION ================= -->
+            <div id="tab-mission" class="tab-content space-y-4 hidden">
+                <div>
+                    <h1 class="text-sm font-extrabold flex items-center space-x-1">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+                        <span>덕질 미션 & 출석 체크</span>
+                    </h1>
+                    <p class="text-[10px] text-slate-400">매일 미션을 완료하고 포인트를 받으세요</p>
+                </div>
+
+                <div id="mission-full-container" class="space-y-2.5">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+
+            <!-- ================= TAB 7: RANKING ================= -->
+            <div id="tab-ranking" class="tab-content space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-sm font-extrabold flex items-center space-x-1">
+                            <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
+                            <span>아이돌 응원 랭킹</span>
+                        </h1>
+                        <p class="text-[10px] text-slate-400">원하는 아이돌을 등록하고 포인트로 투표하세요 (-10P/회, +10점 획득)</p>
+                    </div>
+                    <div class="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 px-2.5 py-1 rounded-xl text-[11px] font-bold">
+                        <span id="ranking-my-points">1,500 P</span>
+                    </div>
+                </div>
+
+                <!-- Add Idol to Ranking Input Field -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-pink-50 dark:border-slate-700 flex items-center space-x-2">
+                    <input type="text" id="new-ranking-idol" placeholder="응원하고 싶은 아이돌 이름 입력..." class="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-[11px]">
+                    <button onclick="addNewRankingIdol()" class="px-3.5 py-2 bg-pink-500 text-white font-bold rounded-xl whitespace-nowrap text-[11px] shadow-xs">
+                        아이돌 추가 🌟
+                    </button>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-pink-50 dark:border-slate-700 space-y-3">
+                    <div class="flex border-b border-slate-100 dark:border-slate-700 pb-2 space-x-3 text-[11px]">
+                        <button onclick="switchRankingTab('overall')" class="ranking-tab-btn font-bold text-pink-600 border-b-2 border-pink-500 pb-0.5" data-rtab="overall">전체 랭킹</button>
+                        <button onclick="switchRankingTab('weekly')" class="ranking-tab-btn font-medium text-slate-400 pb-0.5" data-rtab="weekly">주간</button>
+                        <button onclick="switchRankingTab('monthly')" class="ranking-tab-btn font-medium text-slate-400 pb-0.5" data-rtab="monthly">월간</button>
+                    </div>
+                    <div id="ranking-list-container" class="space-y-2">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ================= TAB 8: FANDOM TEST ================= -->
+            <div id="tab-test" class="tab-content space-y-4 hidden">
+                <div class="text-center space-y-1">
+                    <h1 class="text-base font-extrabold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+                        나의 덕질 유형 테스트 🧩
+                    </h1>
+                    <p class="text-[10px] text-slate-400">
+                        질문에 답하고 8가지 개성 있는 덕질 유형을 확인하세요!
+                    </p>
+                </div>
+
+                <div id="test-container" class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-xs border border-pink-50 dark:border-slate-700">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+
+
+            <!-- ================= TAB 9: THEME (System, Dark, Light - Pastel Removed) ================= -->
+            <div id="tab-theme" class="tab-content space-y-4 hidden">
+                <div>
+                    <h1 class="text-sm font-extrabold flex items-center space-x-1">
+                        <i data-lucide="palette" class="w-4 h-4 text-pink-500"></i>
+                        <span>테마 및 화면 설정</span>
+                    </h1>
+                    <p class="text-[10px] text-slate-400">시스템, 다크, 라이트 모드 중 선택하세요</p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-xs border border-pink-50 dark:border-slate-700 space-y-3">
+                    <label class="font-bold block text-[11px]">모드 선택</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setThemeMode('light')" class="p-3 rounded-xl border-2 border-slate-100 dark:border-slate-700 hover:border-pink-500 flex flex-col items-center space-y-1 transition theme-card text-[11px]" data-theme="light">
+                            <span class="text-lg">☀️</span>
+                            <span class="font-bold">라이트</span>
+                        </button>
+                        <button onclick="setThemeMode('dark')" class="p-3 rounded-xl border-2 border-slate-100 dark:border-slate-700 hover:border-pink-500 flex flex-col items-center space-y-1 transition theme-card text-[11px]" data-theme="dark">
+                            <span class="text-lg">🌙</span>
+                            <span class="font-bold">다크</span>
+                        </button>
+                        <button onclick="setThemeMode('system')" class="p-3 rounded-xl border-2 border-slate-100 dark:border-slate-700 hover:border-pink-500 flex flex-col items-center space-y-1 transition theme-card text-[11px]" data-theme="system">
+                            <span class="text-lg">💻</span>
+                            <span class="font-bold">시스템</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-white/80 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 py-3 text-center text-[10px] text-slate-400 mt-auto">
+            <span class="font-bold text-pink-500">🦆 DUCKZ Mobile Platform</span> • 2026 Edition
+        </footer>
+
+    </div>
+
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // --- INITIAL DEFAULT DATA ---
+        const DEFAULT_BIASES = [
+            {
+                id: 'bias-1',
+                name: '장원영',
+                group: 'IVE (아이브)',
+                agency: '스타쉽엔터테인먼트',
+                birthDate: '2004-08-31',
+                debutDate: '2018-10-29',
+                photoUrl: '',
+                quote: '럭키비키잖아! 🍀',
+                isRepresentative: true,
+                isFavorite: true
+            },
+            {
+                id: 'bias-2',
+                name: '카리나',
+                group: 'aespa (에스파)',
+                agency: 'SM엔터테인먼트',
+                birthDate: '2000-04-11',
+                debutDate: '2020-11-17',
+                photoUrl: '',
+                quote: '오늘도 에스파와 함께!',
+                isRepresentative: false,
+                isFavorite: true
+            }
+        ];
+
+        const DEFAULT_ALBUM = [
+            { id: 'al-1', title: '레전드 영통 포카', idolName: '장원영', url: '' },
+            { id: 'al-2', title: '콘서트 직캠 순간', idolName: '카리나', url: '' }
+        ];
+
+        const DEFAULT_CONCERTS = [
+            {
+                id: 'con-1',
+                title: 'IVE THE 2nd WORLD TOUR',
+                artist: 'IVE',
+                date: '2025-10-14',
+                venue: 'KSPO DOME',
+                review: '실물 영접하고 감동받은 역대급 콘서트!',
+                photoUrl: ''
+            }
+        ];
+
+        const DEFAULT_PLAYLIST = [
+            { id: 's-1', title: 'ATTITUDE', artist: 'IVE', category: 'title', ytUrl: 'https://www.youtube.com/results?search_query=IVE+ATTITUDE', isFavorite: true },
+            { id: 's-2', title: 'Supernova', artist: 'aespa', category: 'title', ytUrl: 'https://www.youtube.com/results?search_query=aespa+Supernova', isFavorite: true }
+        ];
+
+        const DEFAULT_MISSIONS = [
+            { id: 'm-1', title: '출석 체크하기', points: 100, completed: false },
+            { id: 'm-2', title: '오늘의 랜덤 포토 뽑기', points: 150, completed: false },
+            { id: 'm-3', title: '최애곡 플레이리스트 감상', points: 200, completed: false },
+            { id: 'm-4', title: '응원 랭킹 투표 참여', points: 250, completed: false }
+        ];
+
+        const DEFAULT_RANKING = [
+            { rank: 1, name: 'IVE (아이브)', group: '아이브', score: 14250, photo: '' },
+            { rank: 2, name: 'aespa (에스파)', group: '에스파', score: 13890, photo: '' },
+            { rank: 3, name: 'ZEROBASEONE', group: '제로베이스원', score: 9540, photo: '' }
+        ];
+
+        // State
+        let state = {
+            points: 1500,
+            biases: JSON.parse(localStorage.getItem('ducks_biases')) || DEFAULT_BIASES,
+            photoAlbum: JSON.parse(localStorage.getItem('ducks_album')) || DEFAULT_ALBUM,
+            concerts: JSON.parse(localStorage.getItem('ducks_concerts')) || DEFAULT_CONCERTS,
+            playlist: JSON.parse(localStorage.getItem('ducks_playlist')) || DEFAULT_PLAYLIST,
+            missions: JSON.parse(localStorage.getItem('ducks_missions')) || DEFAULT_MISSIONS,
+            rankings: JSON.parse(localStorage.getItem('ducks_rankings')) || DEFAULT_RANKING,
+            drawData: JSON.parse(localStorage.getItem('ducks_draw_data')) || { count: 0, lastDate: '' },
+            pointHistory: JSON.parse(localStorage.getItem('ducks_point_history')) || [
+                { date: '2026-06-01 10:00', title: '신규 가입 축하 포인트', amount: +1500 }
+            ],
+            myProfile: JSON.parse(localStorage.getItem('ducks_my_profile')) || {
+                nickname: '덕질만렙오리',
+                bio: '나만의 최애를 사랑하는 2026 덕후 🦆'
+            },
+            settings: JSON.parse(localStorage.getItem('ducks_settings')) || {
+                theme: 'system'
+            },
+            currentTab: 'home',
+            playlistFilter: 'all',
+            rankingTab: 'overall'
+        };
+
+        function saveState() {
+            localStorage.setItem('ducks_biases', JSON.stringify(state.biases));
+            localStorage.setItem('ducks_album', JSON.stringify(state.photoAlbum));
+            localStorage.setItem('ducks_concerts', JSON.stringify(state.concerts));
+            localStorage.setItem('ducks_playlist', JSON.stringify(state.playlist));
+            localStorage.setItem('ducks_missions', JSON.stringify(state.missions));
+            localStorage.setItem('ducks_rankings', JSON.stringify(state.rankings));
+            localStorage.setItem('ducks_draw_data', JSON.stringify(state.drawData));
+            localStorage.setItem('ducks_point_history', JSON.stringify(state.pointHistory));
+            localStorage.setItem('ducks_my_profile', JSON.stringify(state.myProfile));
+            localStorage.setItem('ducks_settings', JSON.stringify(state.settings));
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            applyTheme(state.settings.theme);
+            checkDailyDrawReset();
+            renderAll();
+            lucide.createIcons();
+        });
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (state.settings.theme === 'system') {
+                applyTheme('system');
+            }
+        });
+
+        function switchTab(tabId) {
+            state.currentTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.getAttribute('data-tab') === tabId) {
+                    btn.className = "nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-pink-600 bg-pink-50 dark:bg-pink-950/40 dark:text-pink-300 font-bold";
+                } else {
+                    btn.className = "nav-btn px-2.5 py-1 rounded-xl whitespace-nowrap flex items-center space-x-1 transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800";
+                }
+            });
+
+            const appFrame = document.getElementById('app-frame');
+            appFrame.scrollTo({ top: 0, behavior: 'smooth' });
+            lucide.createIcons();
+        }
+
+        function renderAll() {
+            document.getElementById('header-points').innerText = state.points.toLocaleString() + ' P';
+            document.getElementById('home-points-val').innerText = state.points.toLocaleString() + ' P';
+            document.getElementById('ranking-my-points').innerText = state.points.toLocaleString() + ' P';
+
+            checkDailyDrawReset();
+            updateDrawLimitIndicator();
+
+            renderHome();
+            renderBiases();
+            renderPhotoAlbum();
+            renderConcerts();
+            renderPlaylist();
+            renderMissions();
+            renderRankings();
+            renderTest();
+            lucide.createIcons();
+        }
+
+        function showToast(msg, icon = '✨') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').innerText = icon;
+            toast.classList.remove('-translate-y-10', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('-translate-y-10', 'opacity-0');
+            }, 2500);
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        function openModalHTML(htmlContent) {
+            const modal = document.getElementById('custom-modal');
+            const content = document.getElementById('modal-content');
+            content.innerHTML = htmlContent;
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function toggleThreeDotMenu() {
+            const dd = document.getElementById('threedot-dropdown');
+            dd.classList.toggle('hidden');
+        }
+
+        // --- NAME-INITIAL AVATAR FALLBACK ---
+        function renderAvatarHTML(photoUrl, name, sizeClass = "w-14 h-14") {
+            if (photoUrl && photoUrl.trim() !== '') {
+                return `<img src="${photoUrl}" class="${sizeClass} rounded-xl object-cover shadow-xs" onerror="this.onerror=null; this.parentNode.innerHTML=generateNameAvatarHtml('${name}', '${sizeClass}');">`;
+            } else {
+                return generateNameAvatarHtml(name, sizeClass);
+            }
+        }
+
+        function generateNameAvatarHtml(name, sizeClass) {
+            const displayName = name ? name.trim() : '덕질';
+            const shortText = displayName.length > 2 ? displayName.substring(0, 2) : displayName;
+            return `
+                <div class="${sizeClass} rounded-xl bg-gradient-to-tr from-pink-400 via-purple-400 to-amber-300 text-white font-extrabold flex flex-col items-center justify-center shadow-xs p-0.5 select-none text-center">
+                    <span class="text-xs sm:text-sm tracking-tight">${shortText}</span>
+                    <span class="text-[8px] opacity-90 truncate max-w-full">${displayName}</span>
+                </div>
+            `;
+        }
+
+        // --- THEME MODES (System, Dark, Light - Pastel Removed) ---
+        function setThemeMode(mode) {
+            state.settings.theme = mode;
+            saveState();
+            applyTheme(mode);
+            showToast(`테마: [${mode === 'light' ? '라이트' : mode === 'dark' ? '다크' : '시스템'}] 모드 적용!`, '🎨');
+        }
+
+        function applyTheme(mode) {
+            const html = document.documentElement;
+            html.classList.remove('dark');
+
+            if (mode === 'dark') {
+                html.classList.add('dark');
+            } else if (mode === 'system') {
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    html.classList.add('dark');
+                }
+            } else {
+                html.classList.remove('dark');
+            }
+
+            document.querySelectorAll('.theme-card').forEach(card => {
+                if (card.getAttribute('data-theme') === mode) {
+                    card.classList.add('border-pink-500', 'bg-pink-50/50', 'dark:bg-slate-800');
+                } else {
+                    card.classList.remove('border-pink-500', 'bg-pink-50/50', 'dark:bg-slate-800');
+                }
+            });
+        }
+
+        // --- DIRECT USER INPUT BIAS MANAGEMENT ---
+        function openBiasAddModal(editId = null) {
+            let bias = { name: '', group: '', birthDate: '', debutDate: '', quote: '', photoUrl: '' };
+            let isEdit = false;
+
+            if (editId) {
+                const found = state.biases.find(b => b.id === editId);
+                if (found) { bias = found; isEdit = true; }
+            }
+
+            openModalHTML(`
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold flex items-center space-x-1">
+                            <i data-lucide="heart" class="w-3.5 h-3.5 text-pink-500"></i>
+                            <span>${isEdit ? '최애 프로필 수정' : '최애 직접 등록'}</span>
+                        </h3>
+                        <button onclick="closeModal()" class="text-slate-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="font-bold text-slate-700 dark:text-slate-300">활동명 / 이름 *</label>
+                            <input type="text" id="bias-name" value="${bias.name}" placeholder="예: 장원영" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 dark:text-slate-300">소속 그룹</label>
+                            <input type="text" id="bias-group" value="${bias.group}" placeholder="예: IVE" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="font-bold text-slate-700 dark:text-slate-300">생일</label>
+                                <input type="date" id="bias-birthday" value="${bias.birthDate !== '정보 없음' ? bias.birthDate : ''}" class="w-full mt-0.5 px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                            </div>
+                            <div>
+                                <label class="font-bold text-slate-700 dark:text-slate-300">데뷔일</label>
+                                <input type="date" id="bias-debutday" value="${bias.debutDate !== '정보 없음' ? bias.debutDate : ''}" class="w-full mt-0.5 px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 dark:text-slate-300">대표 사진 URL</label>
+                            <input type="text" id="bias-photourl" value="${bias.photoUrl}" placeholder="https://... (비워두면 이름 아바타)" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 mb-1">
+                            <input type="file" id="bias-photofile" accept="image/*" onchange="handleBiasImageUpload(event)" class="w-full text-[10px] text-slate-500">
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 dark:text-slate-300">명언 / 한마디</label>
+                            <input type="text" id="bias-quote" value="${bias.quote}" placeholder="예: 럭키비키잖아!" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-1.5 pt-1">
+                        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold">취소</button>
+                        <button onclick="saveBiasData('${editId || ''}')" class="px-4 py-1.5 bg-pink-500 text-white rounded-xl font-bold shadow-xs">저장</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function handleBiasImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('bias-photourl').value = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveBiasData(editId) {
+            const name = document.getElementById('bias-name').value.trim();
+            if (!name) { showToast('활동명을 입력해주세요!', '⚠️'); return; }
+
+            const photoUrl = document.getElementById('bias-photourl').value.trim();
+
+            if (editId) {
+                const b = state.biases.find(x => x.id === editId);
+                if (b) {
+                    b.name = name;
+                    b.group = document.getElementById('bias-group').value.trim() || '소속 그룹 없음';
+                    b.birthDate = document.getElementById('bias-birthday').value || '정보 없음';
+                    b.debutDate = document.getElementById('bias-debutday').value || '정보 없음';
+                    b.quote = document.getElementById('bias-quote').value.trim() || '응원해!';
+                    b.photoUrl = photoUrl;
+                }
+                showToast(`[${name}] 수정 완료! ✨`, '💖');
+            } else {
+                const newBias = {
+                    id: 'bias-' + Date.now(),
+                    name: name,
+                    group: document.getElementById('bias-group').value.trim() || '소속 그룹 없음',
+                    birthDate: document.getElementById('bias-birthday').value || '정보 없음',
+                    debutDate: document.getElementById('bias-debutday').value || '정보 없음',
+                    quote: document.getElementById('bias-quote').value.trim() || '응원해!',
+                    photoUrl: photoUrl,
+                    isRepresentative: state.biases.length === 0,
+                    isFavorite: false
+                };
+                state.biases.push(newBias);
+                showToast(`[${name}] 등록 완료! 💖`, '🎉');
+            }
+
+            saveState();
+            closeModal();
+            renderAll();
+            switchTab('bias');
+        }
+
+        // --- PHOTO ALBUM MANAGEMENT ---
+        function renderPhotoAlbum() {
+            const container = document.getElementById('album-grid-container');
+            container.innerHTML = state.photoAlbum.map(p => `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-2.5 shadow-xs border border-pink-50 dark:border-slate-700 space-y-1.5 text-[11px]">
+                    <div class="w-full h-32 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-900">
+                        ${renderAvatarHTML(p.url, p.title, "w-full h-32 rounded-xl object-cover")}
+                    </div>
+                    <div>
+                        <span class="text-[8px] bg-purple-100 text-purple-600 px-1.5 py-0.2 rounded-full font-bold">${p.idolName}</span>
+                        <h4 class="font-bold text-xs truncate mt-0.5">${p.title}</h4>
+                    </div>
+                    <div class="flex justify-end pt-1">
+                        <button onclick="deletePhotoAlbum('${p.id}')" class="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-red-500 rounded-lg text-[10px]"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                    </div>
+                </div>
+            `).join('') || '<p class="col-span-2 text-center text-slate-400 py-6 text-[11px]">등록된 포토앨범 사진이 없습니다.</p>';
+        }
+
+        function openPhotoModal() {
+            openModalHTML(`
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold">포토앨범 사진 등록</h3>
+                        <button onclick="closeModal()" class="text-slate-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="font-bold">사진 제목 *</label>
+                            <input type="text" id="album-title" placeholder="예: 레전드 직캠 캡처" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                        <div>
+                            <label class="font-bold">아티스트 이름 *</label>
+                            <input type="text" id="album-idol" placeholder="예: 장원영" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                        <div>
+                            <label class="font-bold">사진 URL</label>
+                            <input type="text" id="album-url" placeholder="https://... (비워두면 이름 아바타)" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 mb-1">
+                            <input type="file" accept="image/*" onchange="handleAlbumImageUpload(event)" class="w-full text-[10px] text-slate-500">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-1.5 pt-1">
+                        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold">취소</button>
+                        <button onclick="savePhotoAlbum()" class="px-4 py-1.5 bg-purple-500 text-white rounded-xl font-bold shadow-xs">등록</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function handleAlbumImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('album-url').value = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function savePhotoAlbum() {
+            const title = document.getElementById('album-title').value.trim();
+            const idolName = document.getElementById('album-idol').value.trim();
+            const url = document.getElementById('album-url').value.trim();
+            if (!title || !idolName) { showToast('제목과 아티스트 이름을 입력해주세요!'); return; }
+
+            state.photoAlbum.unshift({
+                id: 'al-' + Date.now(),
+                title: title,
+                idolName: idolName,
+                url: url
+            });
+            saveState(); closeModal(); renderAll();
+            showToast('포토앨범 등록 완료! 📸');
+        }
+
+        function deletePhotoAlbum(id) {
+            state.photoAlbum = state.photoAlbum.filter(p => p.id !== id);
+            saveState(); renderAll();
+            showToast('사진이 삭제되었습니다.');
+        }
+
+        // --- RANDOM DRAW (24시간당 3회 제한) ---
+        function checkDailyDrawReset() {
+            const todayStr = new Date().toDateString();
+            if (state.drawData.lastDate !== todayStr) {
+                state.drawData.count = 0;
+                state.drawData.lastDate = todayStr;
+                saveState();
+            }
+        }
+
+        function updateDrawLimitIndicator() {
+            checkDailyDrawReset();
+            const indicator = document.getElementById('draw-limit-indicator');
+            if (indicator) {
+                const remaining = Math.max(0, 3 - state.drawData.count);
+                indicator.innerText = `남은 횟수: ${remaining}/3회`;
+            }
+        }
+
+        function executeRandomDraw() {
+            checkDailyDrawReset();
+            if (state.drawData.count >= 3) {
+                showToast('오늘의 랜덤 뽑기 횟수를 모두 소모했습니다! (3/3회)', '⚠️');
+                return;
+            }
+
+            let pool = state.photoAlbum;
+            if (!pool || pool.length === 0) {
+                pool = state.biases.map(b => ({ id: b.id, title: b.name + ' 프로필', idolName: b.name, url: b.photoUrl }));
+            }
+            if (pool.length === 0) { showToast('등록된 사진이나 최애가 없습니다!'); return; }
+
+            state.drawData.count++;
+            state.points += 200;
+            state.pointHistory.unshift({ date: new Date().toLocaleString(), title: `랜덤 포토 뽑기 (${state.drawData.count}/3)`, amount: +200 });
+            saveState(); 
+            renderAll();
+
+            const randomPhoto = pool[Math.floor(Math.random() * pool.length)];
+
+            openModalHTML(`
+                <div class="text-center space-y-2.5 py-1 text-[11px]">
+                    <div class="w-12 h-12 mx-auto rounded-full bg-pink-100 flex items-center justify-center text-2xl animate-bounce">🎉</div>
+                    <h3 class="font-extrabold text-xs">오늘의 랜덤 포토 당첨! (${state.drawData.count}/3)</h3>
+                    <div class="bg-pink-50 dark:bg-slate-900 p-3.5 rounded-2xl space-y-2 border border-pink-200 dark:border-slate-700">
+                        <div class="flex justify-center">${renderAvatarHTML(randomPhoto.url, randomPhoto.title, "w-32 h-32 rounded-2xl shadow-md object-cover")}</div>
+                        <div>
+                            <span class="text-[8px] bg-pink-100 text-pink-600 px-1.5 py-0.2 rounded-full font-bold">${randomPhoto.idolName}</span>
+                            <h4 class="font-extrabold text-xs mt-1">${randomPhoto.title}</h4>
+                        </div>
+                        <p class="text-amber-600 dark:text-amber-400 font-bold text-xs">+200 포인트 획득! 🌟</p>
+                    </div>
+                    <button onclick="closeModal()" class="w-full py-2 bg-pink-500 text-white rounded-xl font-bold shadow-xs">확인</button>
+                </div>
+            `);
+        }
+
+        // --- RENDERING HOME & BIASES ---
+        function renderHome() {
+            const repCard = document.getElementById('rep-bias-card');
+            const rep = state.biases.find(b => b.isRepresentative) || state.biases[0];
+
+            if (!rep) {
+                repCard.innerHTML = `
+                    <div class="text-center py-4 w-full space-y-1.5">
+                        <p class="text-[11px] text-slate-400">등록된 최애가 없습니다.</p>
+                        <button onclick="openBiasAddModal()" class="px-3 py-1.5 bg-pink-500 text-white text-[11px] font-bold rounded-xl">최애 등록</button>
+                    </div>
+                `;
+            } else {
+                repCard.innerHTML = `
+                    <div>${renderAvatarHTML(rep.photoUrl, rep.name, "w-14 h-14")}</div>
+                    <div class="flex-1 space-y-0.5 overflow-hidden">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-[8px] bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-300 font-bold px-1.5 py-0.2 rounded-full">대표</span>
+                            <span class="text-[10px] text-slate-400 truncate">${rep.group}</span>
+                        </div>
+                        <h3 class="text-xs font-extrabold text-slate-800 dark:text-white truncate">${rep.name}</h3>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-300 italic truncate">"${rep.quote}"</p>
+                    </div>
+                    <button onclick="openBiasDetail('${rep.id}')" class="px-2.5 py-1 bg-pink-50 dark:bg-slate-700 text-pink-600 dark:text-pink-300 text-[10px] font-bold rounded-xl">
+                        상세
+                    </button>
+                `;
+            }
+
+            // Home Missions
+            document.getElementById('home-missions-list').innerHTML = state.missions.slice(0, 3).map(m => `
+                <div class="flex items-center justify-between py-1 px-2 rounded-xl bg-slate-50 dark:bg-slate-900 text-[10px]">
+                    <span class="${m.completed ? 'line-through text-slate-400' : 'font-medium'}">${m.title}</span>
+                    <button onclick="completeMission('${m.id}')" ${m.completed ? 'disabled' : ''} class="px-2 py-0.5 rounded-lg font-bold ${m.completed ? 'bg-slate-200 text-slate-400' : 'bg-pink-500 text-white'}">
+                        ${m.completed ? '완료' : '+' + m.points}
+                    </button>
+                </div>
+            `).join('');
+
+            // Home Concerts
+            document.getElementById('home-concerts-grid').innerHTML = state.concerts.slice(0, 1).map(c => `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-pink-50 dark:border-slate-700 flex space-x-2.5 items-center">
+                    <div>${renderAvatarHTML(c.photoUrl, c.title, "w-11 h-11")}</div>
+                    <div class="flex-1 space-y-0.5 overflow-hidden">
+                        <span class="text-[8px] bg-purple-100 text-purple-600 px-1.5 py-0.2 rounded-full font-bold">${c.artist}</span>
+                        <h4 class="text-[11px] font-bold truncate">${c.title}</h4>
+                        <p class="text-[9px] text-slate-400">${c.date} | ${c.venue}</p>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-[10px] text-slate-400 text-center py-2">기록된 콘서트가 없습니다.</p>';
+
+            // Home Rankings
+            document.getElementById('home-ranking-preview').innerHTML = state.rankings.slice(0, 2).map((r, i) => `
+                <div class="flex items-center justify-between p-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 text-[11px]">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-4 h-4 rounded-full bg-amber-100 text-amber-800 text-[9px] font-extrabold flex items-center justify-center">${i+1}</span>
+                        <div>${renderAvatarHTML(r.photo, r.name, "w-7 h-7 rounded-full")}</div>
+                        <span class="font-bold truncate max-w-[120px]">${r.name} (${r.score.toLocaleString()}점)</span>
+                    </div>
+                    <button onclick="cheerIdol('${r.name}')" class="px-2 py-1 bg-amber-500 text-white text-[10px] font-bold rounded-lg">응원 🌟</button>
+                </div>
+            `).join('');
+
+            // Home Playlist
+            document.getElementById('home-playlist-area').innerHTML = state.playlist.slice(0, 3).map(s => `
+                <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900 text-[11px]">
+                    <div class="flex items-center space-x-2 overflow-hidden">
+                        <button onclick="toggleSongFavorite('${s.id}')" class="text-amber-400">${s.isFavorite ? '⭐' : '☆'}</button>
+                        <div class="truncate">
+                            <span class="font-bold">${s.title}</span> <span class="text-[10px] text-slate-400">(${s.artist})</span>
+                        </div>
+                    </div>
+                    <a href="${s.ytUrl}" target="_blank" class="px-2.5 py-1 bg-red-500 text-white text-[10px] font-bold rounded-lg flex items-center space-x-1">
+                        <i data-lucide="youtube" class="w-3 h-3"></i><span>YouTube</span>
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function renderBiases() {
+            const container = document.getElementById('bias-list-container');
+            container.innerHTML = state.biases.map(b => `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-xs border border-pink-50 dark:border-slate-700 space-y-2.5 text-[11px]">
+                    <div class="flex items-center space-x-3">
+                        <div>${renderAvatarHTML(b.photoUrl, b.name, "w-14 h-14")}</div>
+                        <div class="flex-1 space-y-0.5 overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] bg-pink-100 text-pink-600 px-1.5 py-0.2 rounded-full font-bold">${b.group}</span>
+                                <button onclick="toggleBiasFavorite('${b.id}')" class="text-amber-400">${b.isFavorite ? '⭐' : '☆'}</button>
+                            </div>
+                            <h3 class="font-extrabold text-xs truncate">${b.name}</h3>
+                            <p class="text-[10px] text-slate-400 truncate">생일: ${b.birthDate} | 데뷔: ${b.debutDate}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700">
+                        <button onclick="setRepresentativeBias('${b.id}')" class="font-bold ${b.isRepresentative ? 'text-amber-500' : 'text-slate-400'}">
+                            ${b.isRepresentative ? '👑 대표 최애' : '대표 지정'}
+                        </button>
+                        <div class="flex space-x-1">
+                            <button onclick="openBiasAddModal('${b.id}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 rounded-lg font-bold">수정</button>
+                            <button onclick="openBiasDetail('${b.id}')" class="px-2.5 py-1 bg-pink-50 dark:bg-slate-700 text-pink-600 rounded-lg font-bold">상세</button>
+                            <button onclick="deleteBias('${b.id}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-red-500 rounded-lg"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setRepresentativeBias(id) {
+            state.biases.forEach(b => b.isRepresentative = (b.id === id));
+            saveState(); renderAll();
+            showToast('대표 최애가 변경되었습니다! 👑');
+        }
+
+        function toggleBiasFavorite(id) {
+            const b = state.biases.find(x => x.id === id);
+            if (b) { b.isFavorite = !b.isFavorite; saveState(); renderAll(); }
+        }
+
+        function deleteBias(id) {
+            state.biases = state.biases.filter(b => b.id !== id);
+            saveState(); renderAll();
+            showToast('최애가 삭제되었습니다.');
+        }
+
+        function openBiasDetail(id) {
+            const b = state.biases.find(x => x.id === id);
+            if (!b) return;
+            openModalHTML(`
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold">[${b.name}] 상세 프로필</h3>
+                        <button onclick="closeModal()" class="text-slate-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                    <div class="flex justify-center">${renderAvatarHTML(b.photoUrl, b.name, "w-20 h-20 rounded-2xl")}</div>
+                    <div class="bg-slate-50 dark:bg-slate-900 p-3 rounded-xl space-y-1">
+                        <p><b>그룹:</b> ${b.group}</p>
+                        <p><b>생일:</b> ${b.birthDate}</p>
+                        <p><b>데뷔일:</b> ${b.debutDate}</p>
+                        <p class="italic text-pink-500">"${b.quote}"</p>
+                    </div>
+                    <button onclick="closeModal()" class="w-full py-2 bg-pink-500 text-white rounded-xl font-bold">확인</button>
+                </div>
+            `);
+        }
+
+        // --- CONCERT MEMORIES ---
+        function renderConcerts() {
+            const container = document.getElementById('concert-list-container');
+            container.innerHTML = state.concerts.map(c => `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-xs border border-pink-50 dark:border-slate-700 space-y-2 text-[11px]">
+                    <div class="flex space-x-2.5 items-center">
+                        <div>${renderAvatarHTML(c.photoUrl, c.title, "w-12 h-12")}</div>
+                        <div class="flex-1 overflow-hidden">
+                            <span class="text-[8px] bg-purple-100 text-purple-600 px-1.5 py-0.2 rounded-full font-bold">${c.artist}</span>
+                            <h3 class="font-extrabold truncate">${c.title}</h3>
+                            <p class="text-[10px] text-slate-400">${c.date} | ${c.venue}</p>
+                        </div>
+                    </div>
+                    <p class="bg-slate-50 dark:bg-slate-900 p-2 rounded-xl text-slate-600 dark:text-slate-300">"${c.review}"</p>
+                    <div class="flex justify-end">
+                        <button onclick="deleteConcert('${c.id}')" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-red-500 font-bold rounded-lg text-[10px]">삭제</button>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-[11px] text-slate-400 text-center py-4">기록된 콘서트가 없습니다.</p>';
+        }
+
+        function openConcertModal() {
+            openModalHTML(`
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold">콘서트 추억 기록</h3>
+                        <button onclick="closeModal()" class="text-slate-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="font-bold">공연명 *</label>
+                            <input type="text" id="con-title" placeholder="예: IVE WORLD TOUR" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="font-bold">아티스트</label>
+                                <input type="text" id="con-artist" placeholder="예: IVE" class="w-full mt-0.5 px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                            </div>
+                            <div>
+                                <label class="font-bold">관람일</label>
+                                <input type="date" id="con-date" class="w-full mt-0.5 px-2 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="font-bold">장소</label>
+                            <input type="text" id="con-venue" placeholder="예: KSPO DOME" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                        <div>
+                            <label class="font-bold">후기 메모</label>
+                            <textarea id="con-review" rows="2" placeholder="후기를 남겨주세요..." class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-1.5 pt-1">
+                        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold">취소</button>
+                        <button onclick="saveConcert()" class="px-4 py-1.5 bg-purple-500 text-white rounded-xl font-bold shadow-xs">저장</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function saveConcert() {
+            const title = document.getElementById('con-title').value.trim();
+            if (!title) { showToast('공연명을 입력해주세요!'); return; }
+            state.concerts.unshift({
+                id: 'con-' + Date.now(),
+                title: title,
+                artist: document.getElementById('con-artist').value.trim() || '아티스트',
+                date: document.getElementById('con-date').value || '2026-06-01',
+                venue: document.getElementById('con-venue').value.trim() || '공연장',
+                review: document.getElementById('con-review').value.trim() || '최고의 공연!',
+                photoUrl: ''
+            });
+            saveState(); closeModal(); renderAll();
+            showToast('콘서트 추억 저장 완료! 🎫');
+        }
+
+        function deleteConcert(id) {
+            state.concerts = state.concerts.filter(c => c.id !== id);
+            saveState(); renderAll();
+            showToast('기록이 삭제되었습니다.');
+        }
+
+        // --- PLAYLIST ---
+        function renderPlaylist() {
+            const container = document.getElementById('playlist-full-container');
+            const filter = state.playlistFilter;
+            const filtered = state.playlist.filter(s => {
+                if (filter === 'all') return true;
+                if (filter === 'favorite') return s.isFavorite;
+                return s.category === filter;
+            });
+
+            container.innerHTML = filtered.map(s => `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-3 shadow-xs border border-pink-50 dark:border-slate-700 flex items-center justify-between text-[11px]">
+                    <div class="flex items-center space-x-2 overflow-hidden">
+                        <button onclick="toggleSongFavorite('${s.id}')" class="text-amber-400">${s.isFavorite ? '⭐' : '☆'}</button>
+                        <div class="truncate">
+                            <span class="font-bold">${s.title}</span> <span class="text-[10px] text-slate-400">(${s.artist})</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <a href="${s.ytUrl}" target="_blank" class="px-2.5 py-1 bg-red-500 text-white text-[10px] font-bold rounded-lg flex items-center space-x-1">
+                            <i data-lucide="youtube" class="w-3 h-3"></i><span>YouTube</span>
+                        </a>
+                        <button onclick="deleteSong('${s.id}')" class="p-1 text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterPlaylist(cat) {
+            state.playlistFilter = cat;
+            document.querySelectorAll('.playlist-filter-btn').forEach(btn => {
+                btn.className = "playlist-filter-btn px-3 py-1 rounded-xl font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 whitespace-nowrap text-[11px]";
+            });
+            event.target.className = "playlist-filter-btn px-3 py-1 rounded-xl font-bold bg-pink-500 text-white whitespace-nowrap text-[11px]";
+            renderPlaylist(); lucide.createIcons();
+        }
+
+        function toggleSongFavorite(id) {
+            const s = state.playlist.find(x => x.id === id);
+            if (s) { s.isFavorite = !s.isFavorite; saveState(); renderAll(); }
+        }
+
+        function openSongModal() {
+            openModalHTML(`
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold">새 곡 추가</h3>
+                        <button onclick="closeModal()" class="text-slate-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="font-bold">곡 제목 *</label>
+                            <input type="text" id="song-title" placeholder="예: ATTITUDE" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                        <div>
+                            <label class="font-bold">아티스트 *</label>
+                            <input type="text" id="song-artist" placeholder="예: IVE" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                        <div>
+                            <label class="font-bold">분류</label>
+                            <select id="song-cat" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                                <option value="title">타이틀곡</option>
+                                <option value="b-side">수록곡</option>
+                                <option value="ost">OST</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-1.5 pt-1">
+                        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold">취소</button>
+                        <button onclick="saveSong()" class="px-4 py-1.5 bg-pink-500 text-white rounded-xl font-bold shadow-xs">추가</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function saveSong() {
+            const title = document.getElementById('song-title').value.trim();
+            const artist = document.getElementById('song-artist').value.trim();
+            if (!title || !artist) { showToast('제목과 아티스트를 입력해주세요!'); return; }
+            state.playlist.push({
+                id: 'song-' + Date.now(),
+                title: title,
+                artist: artist,
+                category: document.getElementById('song-cat').value,
+                ytUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' ' + title)}`,
+                isFavorite: false
+            });
+            saveState(); closeModal(); renderAll();
+            showToast('플레이리스트 곡 추가 완료! 🎵');
+        }
+
+        function deleteSong(id) {
+            state.playlist = state.playlist.filter(s => s.id !== id);
+            saveState(); renderAll();
+            showToast('곡이 삭제되었습니다.');
+        }
+
+        // --- MISSIONS ---
+        function renderMissions() {
+            document.getElementById('mission-full-container').innerHTML = state.missions.map(m => `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-3.5 shadow-xs border border-pink-50 dark:border-slate-700 flex items-center justify-between text-[11px]">
+                    <div class="flex items-center space-x-2">
+                        <span>${m.completed ? '✅' : '🎯'}</span>
+                        <div>
+                            <h4 class="font-bold ${m.completed ? 'line-through text-slate-400' : ''}">${m.title}</h4>
+                            <span class="text-[10px] text-amber-500 font-bold">+${m.points} 포인트</span>
+                        </div>
+                    </div>
+                    <button onclick="completeMission('${m.id}')" ${m.completed ? 'disabled' : ''} class="px-3 py-1.5 rounded-xl font-bold ${m.completed ? 'bg-slate-200 text-slate-400' : 'bg-pink-500 text-white'}">
+                        ${m.completed ? '완료' : '미션 완료'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function completeMission(id) {
+            const m = state.missions.find(x => x.id === id);
+            if (m && !m.completed) {
+                m.completed = true;
+                state.points += m.points;
+                state.pointHistory.unshift({ date: new Date().toLocaleString(), title: `미션: [${m.title}]`, amount: +m.points });
+                saveState(); renderAll();
+                showToast(`미션 완료! +${m.points} 포인트 획득! 🎁`);
+            }
+        }
+
+        // --- RANKING & CHEER LOGIC (-10P / +10 Score, real-time descending sort, persistent) ---
+        function renderRankings() {
+            // Ensure sorted descending by score
+            state.rankings.sort((a, b) => b.score - a.score);
+            state.rankings.forEach((r, idx) => r.rank = idx + 1);
+
+            document.getElementById('ranking-list-container').innerHTML = state.rankings.map((r, i) => `
+                <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 text-[11px]">
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <span class="w-5 h-5 rounded-full bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center text-[10px]">${i + 1}</span>
+                        <div>${renderAvatarHTML(r.photo, r.name, "w-9 h-9 rounded-full")}</div>
+                        <div class="truncate">
+                            <h4 class="font-extrabold truncate">${r.name}</h4>
+                            <span class="text-[9px] text-slate-400">${r.score.toLocaleString()} 점</span>
+                        </div>
+                    </div>
+                    <button onclick="cheerIdol('${r.name}')" class="px-3 py-1.5 bg-amber-500 text-white font-bold rounded-xl whitespace-nowrap text-[10px] shadow-xs">응원하기 🌟</button>
+                </div>
+            `).join('');
+        }
+
+        function switchRankingTab(tab) {
+            state.rankingTab = tab;
+            document.querySelectorAll('.ranking-tab-btn').forEach(btn => {
+                if (btn.getAttribute('data-rtab') === tab) {
+                    btn.className = "ranking-tab-btn font-bold text-pink-600 border-b-2 border-pink-500 pb-0.5 text-[11px]";
+                } else {
+                    btn.className = "ranking-tab-btn font-medium text-slate-400 pb-0.5 text-[11px]";
+                }
+            });
+        }
+
+        function addNewRankingIdol() {
+            const input = document.getElementById('new-ranking-idol');
+            const name = input.value.trim();
+            if (!name) { showToast('아이돌 이름을 입력해주세요!', '⚠️'); return; }
+
+            const exists = state.rankings.find(r => r.name.toLowerCase() === name.toLowerCase());
+            if (exists) { showToast('이미 랭킹에 존재하는 아이돌입니다!'); return; }
+
+            state.rankings.push({
+                rank: state.rankings.length + 1,
+                name: name,
+                group: name,
+                score: 500,
+                photo: ''
+            });
+            state.rankings.sort((a, b) => b.score - a.score);
+            saveState();
+            input.value = '';
+            renderAll();
+            showToast(`[${name}] 응원 랭킹 등록 완료! 🌟`, '🏆');
+        }
+
+        function cheerIdol(name) {
+            if (state.points < 10) { showToast('포인트가 부족합니다! (필요: 10P)', '⚠️'); return; }
+            state.points -= 10;
+            const r = state.rankings.find(x => x.name === name);
+            if (r) {
+                r.score += 10; // +10 score per cheer
+            }
+            state.rankings.sort((a, b) => b.score - a.score);
+            state.pointHistory.unshift({ date: new Date().toLocaleString(), title: `아이돌 응원 투표 (${name})`, amount: -10 });
+            saveState(); 
+            renderAll();
+            showToast(`[${name}] 응원 완료! (+10점) ❤️ (-10P)`);
+        }
+
+        // --- EXPANDED 8-TYPE FANDOM TEST ---
+        let currentTestQ = 0;
+        let testAnswers = [];
+
+        const TEST_QUESTIONS = [
+            {
+                q: '1. 컴백 소식이 떴을 때 당신의 가장 먼저 하는 행동은?',
+                options: [
+                    { text: '버전별 앨범과 포토카드 수집 계획 세우기', type: 'collect' },
+                    { text: '실시간 커뮤니티에 들어가서 팬들과 달리기', type: 'communicate' },
+                    { text: '컴백 스케줄 캘린더에 꼼꼼히 기록하기', type: 'record' }
+                ]
+            },
+            {
+                q: '2. 덕질하면서 가장 중요하게 생각하는 가치는?',
+                options: [
+                    { text: '모든 멤버를 동등하게 아끼는 올팬 마인드', type: 'allfan' },
+                    { text: '최고의 퀄리티 콘서트와 직관 추억 쌓기', type: 'concert' },
+                    { text: '숨겨진 자체 콘텐츠나 비하인드 탐험하기', type: 'explorer' }
+                ]
+            },
+            {
+                q: '3. 음원 공개 시간, 당신의 스트리밍 스타일은?',
+                options: [
+                    { text: '정각부터 무한 스트리밍 총공 참여!', type: 'streamer' },
+                    { text: '음악을 차분히 들으며 감상평 남기기', type: 'communicate' },
+                    { text: '뮤직비디오 조회수 올리기와 응원 투표', type: 'cheer' }
+                ]
+            },
+            {
+                q: '4. 티켓팅 오픈 날, 당신의 마음가짐은?',
+                options: [
+                    { text: '올콘(모든 회차) 직관을 달성하겠어!', type: 'concert' },
+                    { text: '응원법과 슬로건을 완벽히 준비하기', type: 'cheer' },
+                    { text: '기록용 티켓과 굿즈를 예쁘게 보관하기', type: 'record' }
+                ]
+            }
+        ];
+
+        function renderTest() {
+            const container = document.getElementById('test-container');
+            if (currentTestQ >= TEST_QUESTIONS.length) {
+                let counts = { collect: 0, communicate: 0, record: 0, allfan: 0, explorer: 0, cheer: 0, concert: 0, streamer: 0 };
+                testAnswers.forEach(t => counts[t]++);
+                let dominant = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+
+                const RESULTS = {
+                    collect: { title: '🎁 포카 수집가', desc: '포토카드, 앨범, 한정판 굿즈라면 눈이 번쩍이는 완벽한 수집가!' },
+                    communicate: { title: '💬 주접 대장', desc: '팬들과 실시간으로 소통하고 커뮤니티를 누비며 주접을 떠는 분위기 메이커!' },
+                    record: { title: '📖 기록형 마스터', desc: '콘서트 직관 후기, 스케줄, 덕질 일기를 완벽하게 아카이빙하는 능력자!' },
+                    allfan: { title: '🍀 올팬 탐험가', desc: '어느 한 명도 놓칠 수 없는 따뜻한 마음의 소유자, 그룹 전체의 든든한 버팀목!' },
+                    explorer: { title: '🧭 콘텐츠 탐험가', desc: '과거 영상부터 숨겨진 자체 콘텐츠까지 샅샅이 파고드는 열정파!' },
+                    cheer: { title: '🌟 화력 공신', desc: '투표, 스트리밍, 응원 랭킹 등 최애의 1위를 위해 불태우는 전사!' },
+                    concert: { title: '🎫 콘서트 올인러', desc: '콘서트와 팬미팅 현장의 열기를 사랑하는 생생한 직관러!' },
+                    streamer: { title: '🎧 응원봉 장인 / 순정파', desc: '귀가 호강하는 명곡들을 끊임없이 소비하고 응원봉을 흔드는 순정파!' }
+                };
+
+                const res = RESULTS[dominant] || RESULTS.collect;
+
+                container.innerHTML = `
+                    <div class="text-center space-y-3 py-3 text-[11px]">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-pink-100 dark:bg-slate-700 flex items-center justify-center text-3xl animate-bounce">👑</div>
+                        <h3 class="font-extrabold text-sm bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">${res.title}</h3>
+                        <p class="text-slate-600 dark:text-slate-300 leading-relaxed px-2">${res.desc}</p>
+                        <button onclick="resetTest()" class="px-5 py-2 bg-pink-500 text-white font-bold rounded-xl shadow-xs">다시 테스트하기 🔄</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const qObj = TEST_QUESTIONS[currentTestQ];
+            container.innerHTML = `
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex justify-between items-center text-slate-400 font-bold">
+                        <span>질문 ${currentTestQ + 1} / ${TEST_QUESTIONS.length}</span>
+                        <span class="text-pink-500">${Math.round(((currentTestQ) / TEST_QUESTIONS.length) * 100)}%</span>
+                    </div>
+                    <h3 class="font-extrabold text-xs text-slate-800 dark:text-white leading-snug">${qObj.q}</h3>
+                    <div class="space-y-2 pt-1">
+                        ${qObj.options.map(opt => `
+                            <button onclick="answerTest('${opt.type}')" class="w-full text-left p-3 rounded-xl border border-pink-100 dark:border-slate-700 hover:border-pink-500 hover:bg-pink-50/50 dark:hover:bg-slate-700/50 transition font-medium text-slate-700 dark:text-slate-200 shadow-xs">
+                                ${opt.text} &rarr;
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function answerTest(type) {
+            testAnswers.push(type);
+            currentTestQ++;
+            renderTest();
+        }
+
+        function resetTest() {
+            currentTestQ = 0;
+            testAnswers = [];
+            renderTest();
+        }
+
+        // --- MODALS ---
+        function openMyProfileModal() {
+            openModalHTML(`
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold">내 프로필 관리</h3>
+                        <button onclick="closeModal()" class="text-slate-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="font-bold">닉네임</label>
+                            <input type="text" id="my-nickname" value="${state.myProfile.nickname}" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                        <div>
+                            <label class="font-bold">소개</label>
+                            <input type="text" id="my-bio" value="${state.myProfile.bio}" class="w-full mt-0.5 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-1.5 pt-1">
+                        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 rounded-xl font-bold">취소</button>
+                        <button onclick="saveMyProfile()" class="px-4 py-1.5 bg-pink-500 text-white rounded-xl font-bold shadow-xs">저장</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function saveMyProfile() {
+            state.myProfile.nickname = document.getElementById('my-nickname').value.trim() || '덕후';
+            state.myProfile.bio = document.getElementById('my-bio').value.trim() || '';
+            saveState(); closeModal();
+            showToast('프로필 수정 완료! ✨');
+        }
+
+        function openPointHistoryModal() {
+            openModalHTML(`
+                <div class="space-y-3 max-h-[75vh] overflow-y-auto custom-scrollbar text-[11px]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold">포인트 내역</h3>
+                        <button onclick="closeModal()" class="text-slate-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                    <div class="space-y-1.5">
+                        ${state.pointHistory.map(h => `
+                            <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900">
+                                <div>
+                                    <div class="font-bold">${h.title}</div>
+                                    <div class="text-[9px] text-slate-400">${h.date}</div>
+                                </div>
+                                <span class="font-extrabold ${h.amount > 0 ? 'text-amber-500' : 'text-red-500'}">${h.amount > 0 ? '+' : ''}${h.amount}P</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex justify-end pt-1">
+                        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-200 rounded-xl font-bold">확인</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function openBackupModal() {
+            openModalHTML(`
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold">데이터 백업 / 복원</h3>
+                        <button onclick="closeModal()" class="text-slate-400"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                    <textarea id="backup-json" rows="5" class="w-full p-2 font-mono text-[9px] rounded-xl border bg-slate-50 dark:bg-slate-900">${JSON.stringify(state, null, 2)}</textarea>
+                    <div class="flex justify-between pt-1">
+                        <button onclick="restoreData()" class="px-3 py-1.5 bg-blue-500 text-white rounded-xl font-bold">복원하기</button>
+                        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-200 rounded-xl font-bold">닫기</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function restoreData() {
+            try {
+                state = JSON.parse(document.getElementById('backup-json').value);
+                saveState(); closeModal(); renderAll();
+                showToast('데이터 복원 완료! ✨');
+            } catch(e) { showToast('JSON 형식 오류'); }
+        }
+
+        function resetAllDataConfirm() {
+            openModalHTML(`
+                <div class="text-center space-y-2 py-2 text-[11px]">
+                    <div class="text-2xl">⚠️</div>
+                    <h3 class="font-extrabold text-xs">정말 초기화하시겠습니까?</h3>
+                    <div class="flex justify-center space-x-2 pt-2">
+                        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-200 rounded-xl font-bold">취소</button>
+                        <button onclick="localStorage.clear(); location.reload();" class="px-4 py-1.5 bg-red-500 text-white rounded-xl font-bold">초기화</button>
+                    </div>
+                </div>
+            `);
+        }
+    </script>
+</body>
+</html>
