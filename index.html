@@ -80,7 +80,7 @@
     <!-- 메인 콘텐츠 영역 -->
     <main class="flex-1 p-4 space-y-4 pb-6">
 
-      <!-- ==================== 1. 홈 탭 (자정 초기화 일일 퀘스트 & 랭킹 연동) ==================== -->
+      <!-- ==================== 1. 홈 탭 ==================== -->
       <section id="tab-home" class="tab-section space-y-4 animate-pop">
         <!-- 대표 최애 요약 카드 -->
         <div class="bg-gradient-to-br from-sky-400 to-blue-600 rounded-2xl p-4 text-white shadow-md">
@@ -110,15 +110,23 @@
           </div>
         </div>
 
-        <!-- 홈 화면 전용 일일 덕질 퀘스트 패널 (자정 00:00 초기화) -->
+        <!-- 홈 화면 전용 일일 덕질 퀘스트 패널 (최대 2개 노출 + 더보기 화살표 버튼) -->
         <div id="homeMissionSection" class="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-4 text-white shadow-sm space-y-3">
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-sm font-extrabold">🎯 일일 덕질 퀘스트 (포인트 획득)</h2>
-              <p class="text-[11px] text-emerald-50 mt-0.5">매일 밤 12시(00:00)에 미션이 초기화됩니다!</p>
+              <p class="text-[11px] text-emerald-50 mt-0.5">매일 밤 12시(00:00)에 초기화됩니다!</p>
             </div>
           </div>
+          
+          <!-- 미션 목록 컨테이너 -->
           <div id="missionList" class="space-y-2 pt-1"></div>
+
+          <!-- 퀘스트 더보기 / 접기 토글 버튼 -->
+          <button onclick="toggleMissionExpand()" id="missionToggleBtn" class="w-full py-2 bg-black/20 hover:bg-black/30 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 mt-2">
+            <span id="missionToggleText">나머지 퀘스트 더보기 (4개 더)</span>
+            <span id="missionToggleArrow" class="transform transition-transform duration-200">▼</span>
+          </button>
         </div>
 
         <!-- 최애 점수 연동 실시간 응원 랭킹 TOP 3 -->
@@ -131,9 +139,8 @@
         </div>
       </section>
 
-      <!-- ==================== 2. 최애 탭 (사진 터치 시 큰 화면 확인 기능 포함) ==================== -->
+      <!-- ==================== 2. 최애 탭 ==================== -->
       <section id="tab-bias" class="tab-section hidden space-y-5 animate-pop">
-        <!-- 최애 프로필 섹션 -->
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <div>
@@ -149,7 +156,6 @@
 
         <hr class="border-slate-200 dark:border-slate-800" />
 
-        <!-- 덕질유형 테스트 섹션 -->
         <div class="bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 rounded-2xl p-4 space-y-3">
           <div class="flex items-center justify-between">
             <h2 class="text-sm font-extrabold">🦆 심층 덕질 유형 테스트 (7문항)</h2>
@@ -159,7 +165,7 @@
         </div>
       </section>
 
-      <!-- ==================== 3. 앨범 저장소 카테고리 (오직 사진 저장만) ==================== -->
+      <!-- ==================== 3. 앨범 저장소 카테고리 ==================== -->
       <section id="tab-album" class="tab-section hidden space-y-5 animate-pop">
         <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-4 text-white shadow-sm space-y-4">
           <div class="flex items-center justify-between">
@@ -169,7 +175,6 @@
             </div>
           </div>
 
-          <!-- 사진 저장 입력창 -->
           <div class="bg-white/10 p-3.5 rounded-xl border border-white/20 space-y-2.5">
             <div class="text-xs font-bold">➕ 새 사진 저장하기</div>
             <input id="albumTitleInput" type="text" placeholder="사진 제목 (예: 콘서트 레전드 엔딩요정)" class="w-full text-xs bg-black/20 text-white placeholder-indigo-200 border border-white/30 rounded-xl px-3 py-2 outline-none" />
@@ -179,7 +184,6 @@
             </div>
           </div>
 
-          <!-- 저장된 앨범 사진 보관함 리스트 -->
           <div class="space-y-2">
             <div class="flex items-center justify-between text-xs font-bold">
               <span>🖼️ 저장된 앨범 사진 (<span id="albumCount">0</span>장)</span>
@@ -190,7 +194,7 @@
         </div>
       </section>
 
-      <!-- ==================== 4. 랜덤뽑기 카테고리 (오직 랜덤뽑기만) ==================== -->
+      <!-- ==================== 4. 랜덤뽑기 카테고리 ==================== -->
       <section id="tab-draw" class="tab-section hidden space-y-5 animate-pop">
         <div class="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-4 text-white shadow-sm space-y-4">
           <div class="flex items-center justify-between">
@@ -242,12 +246,12 @@
         </div>
       </section>
 
-      <!-- ==================== 6. 전체 랭킹 탭 (최애 점수 연동 응원) ==================== -->
+      <!-- ==================== 6. 전체 랭킹 탭 ==================== -->
       <section id="tab-ranking" class="tab-section hidden space-y-4 animate-pop">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-base font-extrabold">🏆 최애 연동 응원 랭킹</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">등록한 최애 및 후보 응원 1회당 <span class="text-rose-500 font-bold">-10P 차감</span></p>
+            <p class="text-xs text-slate-500 dark:text-slate-400">응원 1회당 <span class="text-rose-500 font-bold">-10P 차감</span></p>
           </div>
           <div class="bg-sky-50 dark:bg-sky-950 border border-sky-200 dark:border-sky-800 px-3 py-1.5 rounded-xl text-xs font-bold text-sky-600 dark:text-sky-400">
             잔액: <span id="rankingPointsDisplay">0 P</span>
@@ -356,9 +360,8 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'duckz_fandom_app_v10';
+    const STORAGE_KEY = 'duckz_fandom_app_v11';
 
-    // 6가지 포인트 획득 방법이 포함된 일일 퀘스트 (매일 자정 00:00 초기화)
     const DEFAULT_MISSIONS = [
       { id: 'm1', title: '최애 직캠 1편 정주행하기', reward: 20, completedDate: null },
       { id: 'm2', title: '오늘의 덕질 일기 한 줄 남기기', reward: 30, completedDate: null },
@@ -447,6 +450,7 @@
 
     let state = loadState();
     let currentTab = 'home';
+    let isMissionExpanded = false; // 퀘스트 더보기 상태 관리 변수
     let testStep = 0;
     let testScores = { streamer: 0, collector: 0, analyst: 0, offline: 0, preacher: 0 };
 
@@ -497,7 +501,6 @@
       }];
     }
 
-    // 최애 프로필 이름이 랭킹에 자동으로 연동되도록 초기 랭킹 구성
     function getInitialRankings() {
       return [
         { id: 'r_bias_1', name: '장원영 (IVE)', score: 200 },
@@ -574,13 +577,12 @@
       return diff > 0 ? `데뷔 D+${diff.toLocaleString()}일` : `데뷔까지 D${diff}`;
     }
 
-    // ==================== 매일 오전 00:00 자정 초기화 검사 로직 ====================
     function checkMidnightMissionReset() {
-      const todayStr = new Date().toDateString(); // 날짜 문자열 (예: "Wed Nov 18 2026")
+      const todayStr = new Date().toDateString();
       let changed = false;
       state.missions.forEach(m => {
         if (m.completedDate && m.completedDate !== todayStr) {
-          m.completedDate = null; // 날짜가 바뀌었으므로 초기화
+          m.completedDate = null;
           changed = true;
         }
       });
@@ -691,6 +693,66 @@
       `).join('');
       
       renderMissions();
+    }
+
+    // ==================== 일일 퀘스트 더보기/접기 토글 기능 ====================
+    function toggleMissionExpand() {
+      isMissionExpanded = !isMissionExpanded;
+      renderMissions();
+    }
+
+    function renderMissions() {
+      const todayStr = new Date().toDateString();
+      const box = document.getElementById('missionList');
+      const toggleText = document.getElementById('missionToggleText');
+      const toggleArrow = document.getElementById('missionToggleArrow');
+      if (!box) return;
+
+      // 펼쳐지지 않았을 때는 상위 2개만 노출
+      const displayMissions = isMissionExpanded ? state.missions : state.missions.slice(0, 2);
+      const hiddenCount = state.missions.length - 2;
+
+      if (toggleText && toggleArrow) {
+        if (isMissionExpanded) {
+          toggleText.textContent = '퀘스트 접기';
+          toggleArrow.style.transform = 'rotate(180deg)';
+        } else {
+          toggleText.textContent = `나머지 퀘스트 더보기 (${hiddenCount}개 더)`;
+          toggleArrow.style.transform = 'rotate(0deg)';
+        }
+      }
+
+      box.innerHTML = displayMissions.map(m => {
+        const isDone = m.completedDate === todayStr;
+
+        return `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/20 ${isDone ? 'opacity-75' : ''}">
+            <div class="pr-2">
+              <div class="text-xs font-bold text-white ${isDone ? 'line-through opacity-70' : ''}">${m.title}</div>
+              <div class="text-[11px] mt-0.5 font-semibold ${isDone ? 'text-amber-200' : 'text-emerald-100'}">
+                ${isDone ? '⏳ 오늘 완료함 (자정 리셋)' : `보상: +${m.reward} P`}
+              </div>
+            </div>
+            <button onclick="completeMission('${m.id}')" ${isDone ? 'disabled' : ''}
+              class="px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition ${isDone ? 'bg-white/20 text-white/50 cursor-not-allowed' : 'bg-white text-emerald-600 hover:bg-emerald-50 shadow-xs active:scale-95'}">
+              ${isDone ? '완료됨' : '퀘스트 완료'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function completeMission(id) {
+      checkMidnightMissionReset();
+      const todayStr = new Date().toDateString();
+      const mission = state.missions.find(m => m.id === id);
+      if (!mission || mission.completedDate === todayStr) return;
+
+      mission.completedDate = todayStr;
+      state.points += mission.reward;
+      saveState();
+      renderAll();
+      showToast(`퀘스트 완료! +${mission.reward}P 획득 🎉`);
     }
 
     // ==================== 최애 사진 확대 보기 기능 ====================
@@ -864,7 +926,7 @@
       showToast(`[${rarity}] ${randomPhoto.title} 포카 뽑기 성공! (+5P) ✨`);
     }
 
-    // ==================== 최애 프로필 설정 (랭킹 자동 연동) ====================
+    // ==================== 최애 프로필 설정 ====================
     function renderBiases() {
       const list = document.getElementById('biasList');
       if (!list) return;
@@ -943,9 +1005,8 @@
     }
 
     function finishSavingBias(name, group, photoUrl) {
-      const newBiasId = 'b_' + Date.now();
       state.biases.push({
-        id: newBiasId,
+        id: 'b_' + Date.now(),
         name,
         group,
         nickname: document.getElementById('biasNickInput').value.trim(),
@@ -954,12 +1015,11 @@
         photo: photoUrl
       });
 
-      // 최애 프로필 등록 시 응원 랭킹 후보에 자동 연동
       const fullName = group ? `${name} (${group})` : name;
       state.rankings.unshift({
         id: 'r_bias_' + Date.now(),
         name: fullName,
-        score: 50 // 기본 연동 응원 점수 제공
+        score: 50
       });
 
       ['biasNameInput', 'biasGroupInput', 'biasNickInput', 'biasBirthInput', 'biasDebutInput', 'biasFileInput'].forEach(id => {
@@ -978,45 +1038,6 @@
       saveState();
       renderAll();
       showToast('최애 프로필이 삭제되었습니다.');
-    }
-
-    // ==================== 일일 퀘스트 (자정 00:00 초기화 반영) ====================
-    function renderMissions() {
-      const todayStr = new Date().toDateString();
-      const box = document.getElementById('missionList');
-      if (!box) return;
-
-      box.innerHTML = state.missions.map(m => {
-        const isDone = m.completedDate === todayStr;
-
-        return `
-          <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/20 ${isDone ? 'opacity-75' : ''}">
-            <div class="pr-2">
-              <div class="text-xs font-bold text-white ${isDone ? 'line-through opacity-70' : ''}">${m.title}</div>
-              <div class="text-[11px] mt-0.5 font-semibold ${isDone ? 'text-amber-200' : 'text-emerald-100'}">
-                ${isDone ? '⏳ 오늘 완료함 (자정 00:00 리셋)' : `보상: +${m.reward} P`}
-              </div>
-            </div>
-            <button onclick="completeMission('${m.id}')" ${isDone ? 'disabled' : ''}
-              class="px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition ${isDone ? 'bg-white/20 text-white/50 cursor-not-allowed' : 'bg-white text-emerald-600 hover:bg-emerald-50 shadow-xs active:scale-95'}">
-              ${isDone ? '완료됨' : '퀘스트 완료'}
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function completeMission(id) {
-      checkMidnightMissionReset();
-      const todayStr = new Date().toDateString();
-      const mission = state.missions.find(m => m.id === id);
-      if (!mission || mission.completedDate === todayStr) return;
-
-      mission.completedDate = todayStr;
-      state.points += mission.reward;
-      saveState();
-      renderAll();
-      showToast(`퀘스트 완료! +${mission.reward}P 획득 🎉 (내일 자정 00:00에 초기화)`);
     }
 
     // ==================== 랭킹 시스템 ====================
@@ -1126,7 +1147,7 @@
       document.getElementById('diaryContent').value = '';
       saveState();
       renderAll();
-      showToast('덕질 일기가 저장되었습니다! ✍️ (+포인트 미션 달성 가능)');
+      showToast('덕질 일기가 저장되었습니다! ✍️');
     }
 
     function renderDiaries() {
@@ -1294,7 +1315,6 @@
       `).join('');
     }
 
-    // 매초 자정 리셋까지 남은 시간 실시간 카운트다운 갱신
     setInterval(() => {
       checkMidnightMissionReset();
       if (currentTab === 'home') renderMissions();
