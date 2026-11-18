@@ -73,15 +73,12 @@
         </div>
       </div>
 
-      <!-- 깔끔하게 축소된 7개 탭 내비게이션 (4 + 3 그리드) -->
+      <!-- 4개 탭 내비게이션 (홈, 최애/앨범/유형 통합, 일정/일기 통합, 랭킹) -->
       <nav id="tabNav" class="grid grid-cols-4 gap-1.5 text-[11px] font-semibold">
         <button onclick="switchTab('home')" data-tab="home" class="tab-btn py-1.5 rounded-lg transition">🏠 홈</button>
-        <button onclick="switchTab('bias')" data-tab="bias" class="tab-btn py-1.5 rounded-lg transition">💖 최애</button>
-        <button onclick="switchTab('mission')" data-tab="mission" class="tab-btn py-1.5 rounded-lg transition">🎯 미션</button>
+        <button onclick="switchTab('bias')" data-tab="bias" class="tab-btn py-1.5 rounded-lg transition">💖 최애·앨범</button>
+        <button onclick="switchTab('schedule')" data-tab="schedule" class="tab-btn py-1.5 rounded-lg transition">📅 일정·일기</button>
         <button onclick="switchTab('ranking')" data-tab="ranking" class="tab-btn py-1.5 rounded-lg transition">🏆 랭킹</button>
-        <button onclick="switchTab('schedule')" data-tab="schedule" class="tab-btn py-1.5 rounded-lg transition">📅 일정</button>
-        <button onclick="switchTab('diary')" data-tab="diary" class="tab-btn py-1.5 rounded-lg transition">✍️ 덕질일기</button>
-        <button onclick="switchTab('test')" data-tab="test" class="tab-btn py-1.5 rounded-lg transition col-span-2">🦆 덕질유형 테스트</button>
       </nav>
     </header>
 
@@ -91,7 +88,7 @@
     <!-- 메인 콘텐츠 영역 -->
     <main class="flex-1 p-4 space-y-4 pb-6">
 
-      <!-- ==================== 1. 홈 탭 (포토랜덤뽑기 통합) ==================== -->
+      <!-- ==================== 1. 홈 탭 ==================== -->
       <section id="tab-home" class="tab-section space-y-4 animate-pop">
         <!-- 대표 최애 요약 카드 -->
         <div class="bg-gradient-to-br from-sky-400 to-blue-600 rounded-2xl p-4 text-white shadow-md">
@@ -102,41 +99,20 @@
           <div id="homeMainBias"></div>
         </div>
 
-        <!-- 포인트 & 미션 현황 -->
+        <!-- 포인트 & 미션 현황 (클릭 시 일일 미션 탭으로 이동) -->
         <div class="grid grid-cols-2 gap-3">
           <div class="bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700 rounded-2xl p-3.5">
             <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">보유 응원 포인트</div>
             <div id="homePoints" class="text-xl font-extrabold text-sky-500">0 P</div>
             <div class="text-[10px] text-rose-500 dark:text-rose-400 mt-1 font-medium">※ 사용한 포인트는 복구 불가</div>
           </div>
-          <div class="bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700 rounded-2xl p-3.5">
-            <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">일일 미션 달성</div>
+          <div onclick="switchTab('mission')" class="bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700 rounded-2xl p-3.5 cursor-pointer hover:border-sky-400 transition">
+            <div class="text-xs text-slate-500 dark:text-slate-400 mb-1 flex items-center justify-between">
+              <span>일일 미션 달성</span>
+              <span class="text-[10px] text-sky-500 font-bold">바로가기 →</span>
+            </div>
             <div id="homeMissionStatus" class="text-xl font-extrabold text-emerald-500">0 / 4</div>
             <div id="homeMissionCountdown" class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">완료 후 24시간 뒤 리셋</div>
-          </div>
-        </div>
-
-        <!-- 홈 통합: 오늘의 랜덤 포토카드 뽑기 & 수집함 -->
-        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-4 text-white shadow-sm space-y-3">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-sm font-extrabold">📸 오늘의 랜덤 포토카드 뽑기</h2>
-              <p class="text-[11px] text-indigo-100">하루 최대 3회 뽑기 · 뽑을 때마다 +5P 적립</p>
-            </div>
-            <span id="drawRemainingBadge" class="text-[11px] font-bold bg-white/20 px-2.5 py-1 rounded-full shrink-0">남은 횟수: 3/3</span>
-          </div>
-
-          <button id="drawCardBtn" onclick="drawPhotoCard()" class="w-full bg-white text-indigo-600 font-extrabold text-xs py-2.5 rounded-xl shadow hover:bg-indigo-50 active:scale-[0.99] transition">
-            ✨ 포토카드 뽑기 (+5P)
-          </button>
-          <div id="drawResetTimer" class="text-[11px] text-center text-indigo-200"></div>
-
-          <!-- 수집한 포토카드 가로 스크롤 미리보기 -->
-          <div class="pt-1 border-t border-white/15">
-            <div class="flex items-center justify-between text-[11px] text-indigo-100 mb-2">
-              <span>내 포토카드 컬렉션 (<span id="collectedCount">0</span>장)</span>
-            </div>
-            <div id="photoCollection" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
           </div>
         </div>
 
@@ -150,44 +126,106 @@
         </div>
       </section>
 
-      <!-- ==================== 2. 최애 탭 (생일/데뷔일 밑에 D-day 표시) ==================== -->
-      <section id="tab-bias" class="tab-section hidden space-y-4 animate-pop">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-base font-extrabold">💖 나의 최애 프로필</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">최애 정보를 등록하면 생일·데뷔일 D-Day가 자동 계산됩니다</p>
+      <!-- ==================== 2. 최애 탭 (프로필, 앨범 뽑기, 덕질유형 테스트 통합) ==================== -->
+      <section id="tab-bias" class="tab-section hidden space-y-5 animate-pop">
+        <!-- 최애 프로필 섹션 -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-base font-extrabold">💖 나의 최애 프로필</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">생일·데뷔일 D-Day 자동 계산</p>
+            </div>
+            <button onclick="openBiasModal()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-xs transition shrink-0">
+              + 최애 등록
+            </button>
           </div>
-          <button onclick="openBiasModal()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs transition shrink-0">
-            + 최애 등록
-          </button>
+          <div id="biasList" class="space-y-3"></div>
         </div>
 
-        <div id="biasList" class="space-y-3"></div>
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <!-- 포토카드 앨범 뽑기 섹션 -->
+        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-4 text-white shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-sm font-extrabold">📸 포토카드 랜덤 앨범 뽑기</h2>
+              <p class="text-[11px] text-indigo-100">하루 최대 3회 뽑기 · 뽑을 때마다 +5P 적립</p>
+            </div>
+            <span id="drawRemainingBadge" class="text-[11px] font-bold bg-white/20 px-2.5 py-1 rounded-full shrink-0">남은 횟수: 3/3</span>
+          </div>
+
+          <button id="drawCardBtn" onclick="drawPhotoCard()" class="w-full bg-white text-indigo-600 font-extrabold text-xs py-2.5 rounded-xl shadow hover:bg-indigo-50 active:scale-[0.99] transition">
+            ✨ 포토카드 뽑기 (+5P)
+          </button>
+          <div id="drawResetTimer" class="text-[11px] text-center text-indigo-200"></div>
+
+          <div class="pt-1 border-t border-white/15">
+            <div class="flex items-center justify-between text-[11px] text-indigo-100 mb-2">
+              <span>수집한 포토카드 컬렉션 (<span id="collectedCount">0</span>장)</span>
+            </div>
+            <div id="photoCollection" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+          </div>
+        </div>
+
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <!-- 덕질유형 테스트 섹션 (최애 카테고리 하단) -->
+        <div class="bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-extrabold">🦆 심층 덕질 유형 테스트 (7문항)</h2>
+            <span id="testProgressBadge" class="text-[11px] font-bold text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-950 px-2.5 py-0.5 rounded-full">1 / 7</span>
+          </div>
+          <div id="testContainer"></div>
+        </div>
       </section>
 
-      <!-- ==================== 3. 일일 미션 탭 (24시간 후 개별 리셋) ==================== -->
-      <section id="tab-mission" class="tab-section hidden space-y-4 animate-pop">
-        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-4 text-white shadow-sm">
+      <!-- ==================== 3. 일정·일기 탭 (일정, 일기, 일일미션 통합) ==================== -->
+      <section id="tab-schedule" class="tab-section hidden space-y-5 animate-pop">
+        <!-- 일일 미션 서브 섹션 -->
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-4 text-white shadow-sm space-y-3">
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-base font-extrabold">🎯 일일 덕질 퀘스트</h2>
-              <p class="text-xs text-emerald-50 mt-0.5">완료 시점으로부터 24시간 뒤 다시 도전할 수 있습니다</p>
+              <p class="text-xs text-emerald-50 mt-0.5">완료 시점부터 24시간 후 리셋</p>
             </div>
             <div class="text-right">
               <div class="text-[10px] uppercase opacity-80">보유 포인트</div>
               <div id="missionPointsDisplay" class="text-lg font-extrabold">0 P</div>
             </div>
           </div>
+          <div id="missionList" class="space-y-2 pt-1"></div>
         </div>
 
-        <div id="missionList" class="space-y-2.5"></div>
+        <hr class="border-slate-200 dark:border-slate-800" />
 
-        <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl p-3 text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-          💡 <strong>포인트 규칙:</strong> 미션으로 모은 포인트는 <strong>🏆 랭킹</strong> 탭에서 최애를 응원할 때 사용됩니다. (1회 응원당 10P 차감 · <strong>한 번 사용한 포인트는 절대 복구되지 않습니다.</strong>)
+        <!-- 일정 관리 섹션 -->
+        <div class="space-y-3">
+          <h2 class="text-base font-extrabold">📅 컴백 · 콘서트 일정</h2>
+          <div class="bg-slate-50 dark:bg-slate-800/70 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <input id="schedTitle" type="text" placeholder="일정 제목 (예: 단독 콘서트 티켓팅)" class="w-full text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
+            <div class="flex gap-2">
+              <input id="schedDate" type="date" class="flex-1 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
+              <button onclick="addSchedule()" class="bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-xl">추가</button>
+            </div>
+          </div>
+          <div id="scheduleList" class="space-y-2"></div>
+        </div>
+
+        <hr class="border-slate-200 dark:border-slate-800" />
+
+        <!-- 덕질 일기 섹션 -->
+        <div class="space-y-3">
+          <h2 class="text-base font-extrabold">✍️ 오늘의 덕질 기록장</h2>
+          <div class="bg-slate-50 dark:bg-slate-800/70 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+            <input id="diaryTitle" type="text" placeholder="오늘의 주접 제목" class="w-full text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
+            <textarea id="diaryContent" rows="3" placeholder="최애를 향한 마음을 자유롭게 기록해보세요..." class="w-full text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none resize-none"></textarea>
+            <button onclick="addDiary()" class="w-full bg-sky-500 text-white text-xs font-bold py-2.5 rounded-xl">일기 저장하기</button>
+          </div>
+          <div id="diaryList" class="space-y-2.5"></div>
         </div>
       </section>
 
-      <!-- ==================== 4. 응원 랭킹 탭 (포인트 차감 & 복구 불가) ==================== -->
+      <!-- ==================== 4. 랭킹 탭 ==================== -->
       <section id="tab-ranking" class="tab-section hidden space-y-4 animate-pop">
         <div class="flex items-center justify-between">
           <div>
@@ -199,7 +237,6 @@
           </div>
         </div>
 
-        <!-- 후보 직접 추가 -->
         <div class="flex gap-2">
           <input id="newRankName" type="text" placeholder="응원할 아이돌/그룹명 직접 입력"
             class="flex-1 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 outline-none focus:border-sky-400" />
@@ -211,47 +248,10 @@
         <div id="rankingList" class="space-y-2.5"></div>
       </section>
 
-      <!-- ==================== 5. 일정 탭 ==================== -->
-      <section id="tab-schedule" class="tab-section hidden space-y-4 animate-pop">
-        <h2 class="text-base font-extrabold">📅 컴백 · 콘서트 · 기념일 일정</h2>
-        <div class="bg-slate-50 dark:bg-slate-800/70 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
-          <input id="schedTitle" type="text" placeholder="일정 제목 (예: 단독 콘서트 티켓팅)" class="w-full text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
-          <div class="flex gap-2">
-            <input id="schedDate" type="date" class="flex-1 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
-            <button onclick="addSchedule()" class="bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-xl">추가</button>
-          </div>
-        </div>
-        <div id="scheduleList" class="space-y-2"></div>
-      </section>
-
-      <!-- ==================== 6. 덕질 일기 탭 ==================== -->
-      <section id="tab-diary" class="tab-section hidden space-y-4 animate-pop">
-        <h2 class="text-base font-extrabold">✍️ 오늘의 덕질 기록장</h2>
-        <div class="bg-slate-50 dark:bg-slate-800/70 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
-          <input id="diaryTitle" type="text" placeholder="오늘의 주접 제목" class="w-full text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
-          <textarea id="diaryContent" rows="3" placeholder="최애를 향한 마음을 자유롭게 기록해보세요..." class="w-full text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none resize-none"></textarea>
-          <button onclick="addDiary()" class="w-full bg-sky-500 text-white text-xs font-bold py-2.5 rounded-xl">일기 저장하기</button>
-        </div>
-        <div id="diaryList" class="space-y-2.5"></div>
-      </section>
-
-      <!-- ==================== 7. 덕질 유형 테스트 탭 (7문항 8가지 유형) ==================== -->
-      <section id="tab-test" class="tab-section hidden space-y-4 animate-pop">
-        <div class="bg-sky-50 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 rounded-2xl p-4">
-          <div class="flex items-center justify-between mb-1">
-            <h2 class="text-base font-extrabold">🦆 심층 덕질 유형 테스트 (7문항)</h2>
-            <span id="testProgressBadge" class="text-[11px] font-bold text-sky-600 dark:text-sky-400 bg-sky-100 dark:bg-sky-950 px-2.5 py-0.5 rounded-full">1 / 7</span>
-          </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">7가지 질문으로 알아보는 나의 진짜 덕질 DNA (총 8가지 유형)</p>
-          <div id="testContainer"></div>
-        </div>
-      </section>
-
     </main>
 
-    <!-- 하단 유튜브 플레이리스트 바 (링크만 넣으면 제목 자동 연동 + 미니 플레이어) -->
+    <!-- 하단 유튜브 플레이리스트 바 -->
     <footer class="sticky bottom-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 p-3">
-      <!-- 인앱 유튜브 미니 플레이어 (곡 선택 시 열림) -->
       <div id="ytPlayerWrapper" class="hidden mb-2.5 bg-slate-950 rounded-xl overflow-hidden shadow-md">
         <div class="flex items-center justify-between px-3 py-1.5 bg-slate-900 text-white text-[11px]">
           <span id="ytNowPlayingTitle" class="font-bold truncate pr-2">재생 중...</span>
@@ -268,7 +268,6 @@
         <button onclick="togglePlaylistForm()" class="text-[11px] font-semibold text-sky-500 hover:underline">+ 유튜브 링크 추가</button>
       </div>
 
-      <!-- 유튜브 링크 자동연동 입력 폼 -->
       <div id="playlistForm" class="hidden mb-2 space-y-1.5">
         <div class="flex gap-1.5">
           <input id="ytUrlInput" type="url" placeholder="유튜브 영상 링크만 붙여넣으세요 (제목 자동 추출!)"
@@ -331,8 +330,7 @@
   </div>
 
   <script>
-    // ==================== 상태 및 상수 ====================
-    const STORAGE_KEY = 'duckz_fandom_app_v4';
+    const STORAGE_KEY = 'duckz_fandom_app_v5';
     const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
     const DEFAULT_MISSIONS = [
@@ -350,7 +348,6 @@
       { title: '연습실 거울샷 포카', rarity: 'R 🩵', color: 'from-purple-400 to-fuchsia-500' },
     ];
 
-    // 7문항 덕질 유형 테스트 데이터 (4가지 축 점수 합산 -> 8가지 결과)
     const TEST_QUESTIONS = [
       {
         q: '1. 최애의 새 앨범 티저가 뜬 자정, 나의 반응은?',
@@ -499,17 +496,9 @@
     }
 
     function getInitialBiases() {
-      return [
-        {
-          id: 'b1',
-          name: '장원영',
-          group: 'IVE',
-          nickname: '럭키비키',
-          birthday: '2004-08-31',
-          debutDate: '2021-12-01',
-          photo: ''
-        }
-      ];
+      return [{
+        id: 'b1', name: '장원영', group: 'IVE', nickname: '럭키비키', birthday: '2004-08-31', debutDate: '2021-12-01', photo: ''
+      }];
     }
 
     function getInitialRankings() {
@@ -525,7 +514,6 @@
       updatePointDisplays();
     }
 
-    // ==================== 테마 관리 (Light / Dark / System) ====================
     function applyTheme(theme) {
       const root = document.documentElement;
       if (theme === 'dark') {
@@ -548,7 +536,6 @@
       if (state.theme === 'system') applyTheme('system');
     });
 
-    // ==================== 유틸리티 (D-Day, 아바타, 타이머) ====================
     function showToast(msg) {
       const el = document.getElementById('toast');
       el.textContent = msg;
@@ -559,13 +546,7 @@
 
     function getInitialAvatar(name, sizeClass = 'w-12 h-12 text-base') {
       const char = (name || '덕').trim().charAt(0);
-      const colors = [
-        'from-sky-400 to-blue-500',
-        'from-pink-400 to-rose-500',
-        'from-amber-400 to-orange-500',
-        'from-emerald-400 to-teal-500',
-        'from-violet-400 to-purple-500'
-      ];
+      const colors = ['from-sky-400 to-blue-500', 'from-pink-400 to-rose-500', 'from-amber-400 to-orange-500', 'from-emerald-400 to-teal-500', 'from-violet-400 to-purple-500'];
       const idx = char.charCodeAt(0) % colors.length;
       return `<div class="${sizeClass} rounded-2xl bg-gradient-to-br ${colors[idx]} text-white font-extrabold flex items-center justify-center shrink-0 shadow-xs">${char}</div>`;
     }
@@ -576,12 +557,10 @@
       if (parts.length < 3) return '';
       const month = parseInt(parts[1], 10) - 1;
       const day = parseInt(parts[2], 10);
-
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       let nextBday = new Date(now.getFullYear(), month, day);
       if (nextBday < today) nextBday = new Date(now.getFullYear() + 1, month, day);
-
       const diff = Math.round((nextBday - today) / (1000 * 60 * 60 * 24));
       return diff === 0 ? '🎉 오늘 생일 (D-Day)' : `D-${diff}`;
     }
@@ -607,7 +586,6 @@
       return `${h}:${m}:${s}`;
     }
 
-    // ==================== 24시간 지난 미션 자동 리셋 ====================
     function checkMissionResets() {
       const now = Date.now();
       let changed = false;
@@ -620,7 +598,6 @@
       if (changed) saveState();
     }
 
-    // ==================== 탭 전환 ====================
     function switchTab(tabName) {
       currentTab = tabName;
       document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
@@ -645,7 +622,6 @@
       });
     }
 
-    // ==================== 렌더링 함수들 ====================
     function renderAll() {
       checkMissionResets();
       updatePointDisplays();
@@ -656,10 +632,10 @@
       renderSchedules();
       renderDiaries();
       renderPlaylist();
+      renderTest();
     }
 
     function renderHome() {
-      // 대표 최애 카드
       const mainBiasBox = document.getElementById('homeMainBias');
       if (state.biases.length === 0) {
         mainBiasBox.innerHTML = `<div class="text-xs opacity-90 py-2">등록된 최애가 없습니다. 최애 탭에서 추가해보세요!</div>`;
@@ -685,14 +661,9 @@
         `;
       }
 
-      // 미션 현황
       const completedCount = state.missions.filter(m => m.completedAt !== null).length;
       document.getElementById('homeMissionStatus').textContent = `${completedCount} / ${state.missions.length}`;
 
-      // 홈 통합: 포토카드 랜덤 뽑기
-      renderHomePhotoDraw();
-
-      // TOP 3 랭킹
       const sorted = [...state.rankings].sort((a, b) => b.score - a.score).slice(0, 3);
       document.getElementById('homeTopRanking').innerHTML = sorted.map((r, i) => `
         <div class="flex items-center justify-between text-xs bg-slate-50 dark:bg-slate-800/80 px-3 py-2 rounded-xl">
@@ -705,49 +676,54 @@
       `).join('');
     }
 
-    // 홈 포토카드 랜덤 뽑기 렌더링
     function cleanOldDraws() {
       const now = Date.now();
       state.drawTimestamps = state.drawTimestamps.filter(ts => (now - ts) < TWENTY_FOUR_HOURS_MS);
     }
 
-    function renderHomePhotoDraw() {
+    function renderPhotoDraw() {
       cleanOldDraws();
       const used = state.drawTimestamps.length;
       const remain = Math.max(0, 3 - used);
 
-      document.getElementById('drawRemainingBadge').textContent = `남은 횟수: ${remain}/3`;
+      const badge = document.getElementById('drawRemainingBadge');
+      if (badge) badge.textContent = `남은 횟수: ${remain}/3`;
+
       const btn = document.getElementById('drawCardBtn');
       const timerEl = document.getElementById('drawResetTimer');
+      if (!btn) return;
 
       if (remain === 0) {
         btn.disabled = true;
         btn.classList.add('opacity-50', 'cursor-not-allowed');
         const oldest = Math.min(...state.drawTimestamps);
         const leftMs = TWENTY_FOUR_HOURS_MS - (Date.now() - oldest);
-        timerEl.textContent = `다음 뽑기 가능까지 ${formatRemainingTime(leftMs)} 남음`;
+        if (timerEl) timerEl.textContent = `다음 뽑기 가능까지 ${formatRemainingTime(leftMs)} 남음`;
       } else {
         btn.disabled = false;
         btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        timerEl.textContent = '';
+        if (timerEl) timerEl.textContent = '';
       }
 
-      document.getElementById('collectedCount').textContent = state.collectedCards.length;
+      const countEl = document.getElementById('collectedCount');
+      if (countEl) countEl.textContent = state.collectedCards.length;
+
       const strip = document.getElementById('photoCollection');
-      if (state.collectedCards.length === 0) {
-        strip.innerHTML = `<div class="text-[11px] text-indigo-200 py-2">아직 뽑은 포토카드가 없습니다. 위 버튼을 눌러 첫 카드를 뽑아보세요!</div>`;
-        return;
+      if (strip) {
+        if (state.collectedCards.length === 0) {
+          strip.innerHTML = `<div class="text-[11px] text-indigo-200 py-2">아직 뽑은 포토카드가 없습니다. 위 버튼을 눌러 첫 카드를 뽑아보세요!</div>`;
+        } else {
+          strip.innerHTML = state.collectedCards.map(c => `
+            <div class="shrink-0 w-32 bg-gradient-to-br ${c.color} rounded-xl p-2.5 text-white shadow-xs flex flex-col justify-between h-20 border border-white/25">
+              <div class="flex justify-between items-center">
+                <span class="text-[9px] font-extrabold bg-black/25 px-1.5 py-0.5 rounded-full">${c.rarity}</span>
+                <span class="text-[9px] opacity-90 truncate max-w-[52px]">${c.biasName}</span>
+              </div>
+              <div class="text-[11px] font-extrabold leading-tight line-clamp-2">${c.title}</div>
+            </div>
+          `).join('');
+        }
       }
-
-      strip.innerHTML = state.collectedCards.map(c => `
-        <div class="shrink-0 w-32 bg-gradient-to-br ${c.color} rounded-xl p-2.5 text-white shadow-xs flex flex-col justify-between h-20 border border-white/25">
-          <div class="flex justify-between items-center">
-            <span class="text-[9px] font-extrabold bg-black/25 px-1.5 py-0.5 rounded-full">${c.rarity}</span>
-            <span class="text-[9px] opacity-90 truncate max-w-[52px]">${c.biasName}</span>
-          </div>
-          <div class="text-[11px] font-extrabold leading-tight line-clamp-2">${c.title}</div>
-        </div>
-      `).join('');
     }
 
     function drawPhotoCard() {
@@ -768,9 +744,9 @@
       showToast(`[${pick.rarity}] ${pick.title} 획득! (+5P) 📸`);
     }
 
-    // 2. 최애 탭 렌더링 (생일, 데뷔일 밑에 작게 D-day 표시)
     function renderBiases() {
       const list = document.getElementById('biasList');
+      if (!list) return;
       if (state.biases.length === 0) {
         list.innerHTML = `<div class="text-center py-10 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800/40 rounded-2xl">상단 '+ 최애 등록' 버튼을 눌러 첫 최애를 등록해보세요!</div>`;
         return;
@@ -798,7 +774,6 @@
               <button onclick="deleteBias('${b.id}')" class="text-[11px] text-slate-400 hover:text-rose-500 px-1.5 py-0.5">삭제</button>
             </div>
 
-            <!-- 생일 & 데뷔일 밑에 작게 D-day 표시 -->
             <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/70">
               <div class="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-2.5">
                 <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">🎂 생일</div>
@@ -814,6 +789,7 @@
           </div>
         `;
       }).join('');
+      renderPhotoDraw();
     }
 
     function openBiasModal() {
@@ -859,25 +835,25 @@
       showToast('최애 프로필이 삭제되었습니다.');
     }
 
-    // 3. 일일 미션 (완료 후 24시간 뒤 다시 가능)
     function renderMissions() {
       const now = Date.now();
       const box = document.getElementById('missionList');
+      if (!box) return;
 
       box.innerHTML = state.missions.map(m => {
         const isDone = m.completedAt !== null && (now - m.completedAt < TWENTY_FOUR_HOURS_MS);
         const remainMs = isDone ? (TWENTY_FOUR_HOURS_MS - (now - m.completedAt)) : 0;
 
         return `
-          <div class="flex items-center justify-between p-3.5 rounded-2xl border ${isDone ? 'bg-slate-50/70 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-800' : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700'}">
+          <div class="flex items-center justify-between p-3 rounded-xl bg-white/10 border border-white/2k ${isDone ? 'opacity-75' : ''}">
             <div class="pr-2">
-              <div class="text-xs font-bold ${isDone ? 'line-through text-slate-400' : ''}">${m.title}</div>
-              <div class="text-[11px] mt-1 font-semibold ${isDone ? 'text-amber-500' : 'text-emerald-500'}">
+              <div class="text-xs font-bold text-white ${isDone ? 'line-through opacity-70' : ''}">${m.title}</div>
+              <div class="text-[11px] mt-0.5 font-semibold ${isDone ? 'text-amber-200' : 'text-emerald-100'}">
                 ${isDone ? `⏳ 24시간 뒤 재도전 (${formatRemainingTime(remainMs)})` : `보상: +${m.reward} P`}
               </div>
             </div>
             <button onclick="completeMission('${m.id}')" ${isDone ? 'disabled' : ''}
-              class="px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition ${isDone ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-xs active:scale-95'}">
+              class="px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition ${isDone ? 'bg-white/20 text-white/50 cursor-not-allowed' : 'bg-white text-emerald-600 hover:bg-emerald-50 shadow-xs active:scale-95'}">
               ${isDone ? '완료됨' : '퀘스트 완료'}
             </button>
           </div>
@@ -897,10 +873,10 @@
       showToast(`퀘스트 완료! +${mission.reward}P 획득 (24시간 후 초기화) 🎉`);
     }
 
-    // 4. 응원 랭킹 (포인트 차감 & 복구 불가)
     function renderRankings() {
       const sorted = [...state.rankings].sort((a, b) => b.score - a.score);
       const box = document.getElementById('rankingList');
+      if (!box) return;
 
       box.innerHTML = sorted.map((item, idx) => `
         <div class="flex items-center justify-between bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-3.5">
@@ -937,7 +913,7 @@
 
     function cheerCandidate(id) {
       if (state.points < 10) {
-        showToast('포인트가 부족합니다! 일일 미션을 완료해 포인트를 모아주세요.');
+        showToast('포인트가 부족합니다! 미션을 완료해 포인트를 모아주세요.');
         return;
       }
       const target = state.rankings.find(r => r.id === id);
@@ -950,7 +926,6 @@
       showToast(`${target.name} 응원 완료! (-10P 차감 / 복구 불가) 💙`);
     }
 
-    // 5. 일정 관리
     function addSchedule() {
       const title = document.getElementById('schedTitle').value.trim();
       const date = document.getElementById('schedDate').value;
@@ -968,8 +943,9 @@
 
     function renderSchedules() {
       const box = document.getElementById('scheduleList');
+      if (!box) return;
       if (state.schedules.length === 0) {
-        box.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">등록된 일정이 없습니다.</div>`;
+        box.innerHTML = `<div class="text-center py-4 text-xs text-slate-400">등록된 일정이 없습니다.</div>`;
         return;
       }
       box.innerHTML = state.schedules.map(s => `
@@ -989,7 +965,6 @@
       renderAll();
     }
 
-    // 6. 덕질 일기
     function addDiary() {
       const title = document.getElementById('diaryTitle').value.trim();
       const content = document.getElementById('diaryContent').value.trim();
@@ -1008,8 +983,9 @@
 
     function renderDiaries() {
       const box = document.getElementById('diaryList');
+      if (!box) return;
       if (state.diaries.length === 0) {
-        box.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">첫 번째 덕질 일기를 기록해보세요!</div>`;
+        box.innerHTML = `<div class="text-center py-4 text-xs text-slate-400">첫 번째 덕질 일기를 기록해보세요!</div>`;
         return;
       }
       box.innerHTML = state.diaries.map(d => `
@@ -1023,13 +999,13 @@
       `).join('');
     }
 
-    // 7. 덕질 유형 테스트 (7문항 -> 8가지 결과)
     function renderTest() {
       const container = document.getElementById('testContainer');
       const badge = document.getElementById('testProgressBadge');
+      if (!container) return;
 
       if (testStep >= TEST_QUESTIONS.length) {
-        badge.textContent = '결과 완료';
+        if (badge) badge.textContent = '결과 완료';
         const sortedTypes = Object.entries(testScores).sort((a, b) => b[1] - a[1]);
         const top1 = sortedTypes[0][0];
         const top2 = sortedTypes[1][0];
@@ -1050,7 +1026,7 @@
         return;
       }
 
-      badge.textContent = `${testStep + 1} / ${TEST_QUESTIONS.length}`;
+      if (badge) badge.textContent = `${testStep + 1} / ${TEST_QUESTIONS.length}`;
       const currentQ = TEST_QUESTIONS[testStep];
       container.innerHTML = `
         <div class="space-y-2.5 animate-pop">
@@ -1082,7 +1058,6 @@
       renderTest();
     }
 
-    // ==================== 하단 유튜브 자동연동 플레이리스트 ====================
     function togglePlaylistForm() {
       document.getElementById('playlistForm').classList.toggle('hidden');
     }
@@ -1116,17 +1091,10 @@
       try {
         const res = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
         const data = await res.json();
-        if (data && data.title) {
-          autoTitle = data.title;
-        }
+        if (data && data.title) autoTitle = data.title;
       } catch (e) {}
 
-      state.playlist.unshift({
-        id: 'p_' + Date.now(),
-        videoId,
-        title: autoTitle
-      });
-
+      state.playlist.unshift({ id: 'p_' + Date.now(), videoId, title: autoTitle });
       input.value = '';
       btn.disabled = false;
       btn.textContent = '자동 추가';
@@ -1140,6 +1108,7 @@
       const wrapper = document.getElementById('ytPlayerWrapper');
       const iframe = document.getElementById('ytIframe');
       const titleEl = document.getElementById('ytNowPlayingTitle');
+      if (!wrapper || !iframe) return;
 
       titleEl.textContent = `🎵 ${title}`;
       iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
@@ -1149,8 +1118,8 @@
     function closeYtPlayer() {
       const wrapper = document.getElementById('ytPlayerWrapper');
       const iframe = document.getElementById('ytIframe');
-      iframe.src = '';
-      wrapper.classList.add('hidden');
+      if (iframe) iframe.src = '';
+      if (wrapper) wrapper.classList.add('hidden');
     }
 
     function removePlaylistSong(e, id) {
@@ -1162,6 +1131,7 @@
 
     function renderPlaylist() {
       const box = document.getElementById('playlistItems');
+      if (!box) return;
       if (state.playlist.length === 0) {
         box.innerHTML = `<div class="text-[11px] text-slate-400 py-1">우측 '+ 유튜브 링크 추가'를 눌러 곡을 등록해보세요!</div>`;
         return;
@@ -1176,11 +1146,10 @@
       `).join('');
     }
 
-    // ==================== 실시간 1초 타이머 ====================
     setInterval(() => {
       checkMissionResets();
-      if (currentTab === 'mission') renderMissions();
-      if (currentTab === 'home') renderHomePhotoDraw();
+      if (currentTab === 'schedule') renderMissions();
+      if (currentTab === 'bias') renderPhotoDraw();
 
       const activeDone = state.missions.filter(m => m.completedAt !== null);
       const homeCd = document.getElementById('homeMissionCountdown');
@@ -1195,10 +1164,8 @@
       }
     }, 1000);
 
-    // 초기화 실행
     document.getElementById('themeSelect').value = state.theme;
     applyTheme(state.theme);
-    renderTest();
     switchTab('home');
   </script>
 </body>
