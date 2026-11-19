@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>DUCKZ (덕즈) - 나만의 덕질관리 앱</title>
+  <title>DUCKZ (덕즈) - 나만의 팬덤 앱</title>
 
   <!-- PWA Manifest 및 깃허브 icon-192.png 연동 -->
   <link rel="manifest" href="./manifest.json" />
@@ -85,7 +85,7 @@
     <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 dark:bg-slate-100/95 text-white dark:text-slate-900 text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap"></div>
 
     <!-- 메인 콘텐츠 영역 -->
-    <main class="flex-1 p-4 space-y-4 pb-6">
+    <main id="mainSwipeArea" class="flex-1 p-4 space-y-4 pb-6 touch-pan-y">
 
       <!-- ==================== 1. 홈 탭 ==================== -->
       <section id="tab-home" class="tab-section space-y-4 animate-pop">
@@ -667,6 +667,43 @@
       renderTest();
       renderAlbumStorage();
       renderDrawSection();
+    }
+
+    // ==================== 모바일 좌우 스와이프(슬라이딩) 탭 이동 ====================
+    const TAB_ORDER = ['home', 'bias', 'album', 'draw', 'schedule'];
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    const mainSwipeArea = document.getElementById('mainSwipeArea');
+    if (mainSwipeArea) {
+      mainSwipeArea.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      mainSwipeArea.addEventListener('touchend', (e) => {
+        // 가로 스크롤 영역(포토카드 컬렉션 등) 내부 스와이프는 탭 이동에서 제외
+        if (e.target.closest('.overflow-x-auto')) return;
+
+        const touchEndX = e.changedTouches[0].screenX;
+        const touchEndY = e.changedTouches[0].screenY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        // 수직 스크롤보다 수평 이동이 크고, 최소 60px 이상 스와이프했을 때 동작
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
+          const currentIndex = TAB_ORDER.indexOf(currentTab);
+          if (currentIndex === -1) return;
+
+          if (diffX > 0 && currentIndex < TAB_ORDER.length - 1) {
+            // 손가락을 오른쪽으로 슬라이딩 -> 다음 탭으로 이동
+            switchTab(TAB_ORDER[currentIndex + 1]);
+          } else if (diffX < 0 && currentIndex > 0) {
+            // 손가락을 왼쪽으로 슬라이딩 -> 이전 탭으로 이동
+            switchTab(TAB_ORDER[currentIndex - 1]);
+          }
+        }
+      }, { passive: true });
     }
 
     function renderHome() {
