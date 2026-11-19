@@ -145,7 +145,7 @@
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-base font-extrabold">💖 나의 최애 프로필</h2>
-              <p class="text-xs text-slate-500 dark:text-slate-400">사진 터치 시 큰 화면으로 확인 가능 & 랭킹 자동 연동</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">프로필 터치 시 사진 크게 보기 · 수정 및 삭제 가능</p>
             </div>
             <button onclick="openBiasModal()" class="bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-xs transition shrink-0">
               + 최애 등록
@@ -304,13 +304,14 @@
 
   </div>
 
-  <!-- 최애 등록 모달 -->
+  <!-- 최애 등록/수정 모달 -->
   <div id="biasModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 w-full max-w-[380px] rounded-2xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-3 animate-pop">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-extrabold">💖 최애 프로필 등록</h3>
+        <h3 id="biasModalTitle" class="text-base font-extrabold">💖 최애 프로필 등록</h3>
         <button onclick="closeBiasModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
       </div>
+      <input type="hidden" id="editBiasId" value="" />
 
       <div class="space-y-2.5 text-xs">
         <div>
@@ -338,7 +339,7 @@
           </div>
         </div>
         <div>
-          <label class="block font-bold mb-1">프로필 사진 업로드 (내 기기 사진 선택)</label>
+          <label class="block font-bold mb-1">프로필 사진 업로드 (새 사진 선택 시 변경)</label>
           <input id="biasFileInput" type="file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-50 file:text-sky-600 hover:file:bg-sky-100 cursor-pointer" />
         </div>
       </div>
@@ -350,17 +351,18 @@
     </div>
   </div>
 
-  <!-- 최애 사진 확대 보기 모달 -->
-  <div id="photoZoomModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4" onclick="closePhotoZoom()">
+  <!-- 최애 사진 크게 보기 모달 -->
+  <div id="photoZoomModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4" onclick="closePhotoZoom()">
     <div class="relative max-w-full max-h-full flex flex-col items-center animate-pop" onclick="event.stopPropagation()">
-      <button onclick="closePhotoZoom()" class="absolute -top-10 right-0 text-white text-xl font-bold bg-black/50 w-8 h-8 rounded-full flex items-center justify-center">✕</button>
-      <img id="zoomedImg" src="" class="max-w-[360px] max-h-[70vh] rounded-2xl object-contain shadow-2xl border-2 border-white/20" />
-      <div id="zoomedCaption" class="text-white text-xs font-bold mt-3"></div>
+      <button onclick="closePhotoZoom()" class="absolute -top-11 right-0 text-white text-lg font-bold bg-white/15 hover:bg-white/25 w-9 h-9 rounded-full flex items-center justify-center transition">✕</button>
+      <img id="zoomedImg" src="" alt="최애 프로필 확대 사진" class="max-w-[360px] max-h-[72vh] rounded-2xl object-contain shadow-2xl border-2 border-white/20 bg-slate-900" />
+      <div id="zoomedCaption" class="text-white text-sm font-extrabold mt-3 text-center"></div>
+      <div id="zoomedSubCaption" class="text-slate-300 text-xs mt-1 text-center"></div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'duckz_fandom_app_v11';
+    const STORAGE_KEY = 'duckz_fandom_app_v12';
 
     const DEFAULT_MISSIONS = [
       { id: 'm1', title: '최애 직캠 1편 정주행하기', reward: 20, completedDate: null },
@@ -450,7 +452,7 @@
 
     let state = loadState();
     let currentTab = 'home';
-    let isMissionExpanded = false; // 퀘스트 더보기 상태 관리 변수
+    let isMissionExpanded = false;
     let testStep = 0;
     let testScores = { streamer: 0, collector: 0, analyst: 0, offline: 0, preacher: 0 };
 
@@ -510,7 +512,11 @@
     }
 
     function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        showToast('저장 공간이 부족하여 일부 이미지가 저장되지 않을 수 있습니다.');
+      }
       updatePointDisplays();
     }
 
@@ -658,8 +664,8 @@
       } else {
         const b = state.biases[0];
         const avatar = b.photo
-          ? `<img src="${b.photo}" onerror="this.style.display='none'" onclick="openPhotoZoom('${b.photo}', '${b.name} (${b.group || '최애'})')" class="w-12 h-12 rounded-2xl object-cover border-2 border-white/40 cursor-pointer hover:opacity-95 transition" />`
-          : `<div onclick="openPhotoZoom('', '${b.name}')" class="w-12 h-12 rounded-2xl bg-white/25 font-extrabold text-lg flex items-center justify-center cursor-pointer">${b.name.charAt(0)}</div>`;
+          ? `<img src="${b.photo}" onerror="this.style.display='none'" onclick="openPhotoZoomByBiasId('${b.id}')" class="w-12 h-12 rounded-2xl object-cover border-2 border-white/40 cursor-pointer hover:opacity-95 transition" />`
+          : `<div onclick="openPhotoZoomByBiasId('${b.id}')" class="w-12 h-12 rounded-2xl bg-white/25 font-extrabold text-lg flex items-center justify-center cursor-pointer">${b.name.charAt(0)}</div>`;
         mainBiasBox.innerHTML = `
           <div class="flex items-center gap-3">
             ${avatar}
@@ -708,7 +714,6 @@
       const toggleArrow = document.getElementById('missionToggleArrow');
       if (!box) return;
 
-      // 펼쳐지지 않았을 때는 상위 2개만 노출
       const displayMissions = isMissionExpanded ? state.missions : state.missions.slice(0, 2);
       const hiddenCount = state.missions.length - 2;
 
@@ -755,17 +760,42 @@
       showToast(`퀘스트 완료! +${mission.reward}P 획득 🎉`);
     }
 
-    // ==================== 최애 사진 확대 보기 기능 ====================
-    function openPhotoZoom(url, caption) {
+    // ==================== 최애 사진 크게 보기 기능 ====================
+    function openPhotoZoomByBiasId(biasId) {
+      const bias = state.biases.find(b => b.id === biasId);
+      if (!bias) return;
+      if (!bias.photo) {
+        showToast('등록된 프로필 사진이 없습니다. [수정] 버튼으로 사진을 추가해보세요!');
+        return;
+      }
+      openPhotoZoom(bias.photo, `${bias.name}${bias.group ? ' (' + bias.group + ')' : ''}`, bias.nickname ? `애칭: ${bias.nickname}` : '');
+    }
+
+    function openPhotoZoomByAlbumId(albumId) {
+      const item = state.userAlbum.find(p => p.id === albumId);
+      if (!item) return;
+      openPhotoZoom(item.url, item.title);
+    }
+
+    function openPhotoZoomByCardId(cardId) {
+      const card = state.collectedCards.find(c => c.id === cardId);
+      if (!card) return;
+      openPhotoZoom(card.url, `${card.title} [${card.rarity}]`, card.biasName);
+    }
+
+    function openPhotoZoom(url, caption, subCaption = '') {
+      if (!url) {
+        showToast('표시할 사진이 없습니다!');
+        return;
+      }
       const modal = document.getElementById('photoZoomModal');
       const img = document.getElementById('zoomedImg');
       const cap = document.getElementById('zoomedCaption');
-      if (!url) {
-        showToast('등록된 프로필 사진이 없습니다!');
-        return;
-      }
+      const subCap = document.getElementById('zoomedSubCaption');
+
       img.src = url;
-      cap.textContent = caption || '최애 프로필 사진';
+      cap.textContent = caption || '사진 크게 보기';
+      subCap.textContent = subCaption;
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     }
@@ -825,7 +855,7 @@
           grid.innerHTML = state.userAlbum.map(p => `
             <div class="relative group bg-black/30 rounded-xl overflow-hidden border border-white/25 flex flex-col h-32 shadow-xs">
               <div class="h-24 w-full relative">
-                <img src="${p.url}" onclick="openPhotoZoom('${p.url}', '${p.title}')" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" />
+                <img src="${p.url}" onclick="openPhotoZoomByAlbumId('${p.id}')" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition" />
                 <button onclick="deleteAlbumPhoto('${p.id}')" class="absolute top-1 right-1 bg-black/60 hover:bg-rose-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center transition">✕</button>
               </div>
               <div class="p-1.5 flex-1 flex items-center justify-center bg-black/40">
@@ -882,7 +912,7 @@
           strip.innerHTML = state.collectedCards.map(c => `
             <div class="shrink-0 w-28 bg-black/40 rounded-xl overflow-hidden border border-white/25 flex flex-col h-28 shadow-xs">
               <div class="h-16 w-full relative">
-                <img src="${c.url}" onclick="openPhotoZoom('${c.url}', '${c.title}')" class="w-full h-full object-cover cursor-pointer" />
+                <img src="${c.url}" onclick="openPhotoZoomByCardId('${c.id}')" class="w-full h-full object-cover cursor-pointer" />
                 <span class="absolute top-1 left-1 text-[8px] font-extrabold bg-black/60 text-white px-1.5 py-0.5 rounded">${c.rarity}</span>
               </div>
               <div class="p-1.5 flex-1 flex flex-col justify-center">
@@ -926,7 +956,7 @@
       showToast(`[${rarity}] ${randomPhoto.title} 포카 뽑기 성공! (+5P) ✨`);
     }
 
-    // ==================== 최애 프로필 설정 ====================
+    // ==================== 최애 프로필 설정 (수정 및 사진 보기 지원) ====================
     function renderBiases() {
       const list = document.getElementById('biasList');
       if (!list) return;
@@ -937,24 +967,29 @@
 
       list.innerHTML = state.biases.map((b, idx) => {
         const avatarHtml = b.photo
-          ? `<img src="${b.photo}" onerror="this.outerHTML=\`${getInitialAvatar(b.name, 'w-14 h-14 text-lg').replace(/"/g, '&quot;')}\`" onclick="openPhotoZoom('${b.photo}', '${b.name} (${b.group || '최애'})')" class="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-xs cursor-pointer hover:opacity-95 transition" />`
-          : `<div onclick="openPhotoZoom('', '${b.name}')">${getInitialAvatar(b.name, 'w-14 h-14 text-lg')}</div>`;
+          ? `<img src="${b.photo}" onerror="this.outerHTML=\`${getInitialAvatar(b.name, 'w-14 h-14 text-lg').replace(/"/g, '&quot;')}\`" class="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-xs ring-2 ring-sky-400/40" />`
+          : `${getInitialAvatar(b.name, 'w-14 h-14 text-lg')}`;
 
         return `
-          <div class="bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 rounded-2xl p-4 shadow-xs">
-            <div class="flex items-start justify-between gap-3">
-              <div class="flex items-center gap-3">
+          <div onclick="openPhotoZoomByBiasId('${b.id}')" class="bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400/80 rounded-2xl p-4 shadow-xs cursor-pointer transition">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-3 min-w-0">
                 ${avatarHtml}
-                <div>
+                <div class="min-w-0">
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="font-extrabold text-sm">${b.name}</span>
+                    <span class="font-extrabold text-sm truncate">${b.name}</span>
                     ${b.group ? `<span class="text-[11px] font-semibold bg-sky-100 dark:bg-sky-900/70 text-sky-600 dark:text-sky-300 px-2 py-0.5 rounded-full">${b.group}</span>` : ''}
                     ${idx === 0 ? `<span class="text-[10px] font-bold bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-300 px-1.5 py-0.5 rounded">대표최애</span>` : ''}
                   </div>
-                  ${b.nickname ? `<div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">애칭: ${b.nickname} (사진 터치 시 확대)</div>` : ''}
+                  <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    ${b.nickname ? `애칭: ${b.nickname} · ` : ''}<span class="text-sky-500 font-medium">터치 시 사진 보기</span>
+                  </div>
                 </div>
               </div>
-              <button onclick="deleteBias('${b.id}')" class="text-[11px] text-slate-400 hover:text-rose-500 px-1.5 py-0.5">삭제</button>
+              <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+                <button onclick="openEditBiasModal('${b.id}')" class="text-[11px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/70 hover:bg-sky-100 px-2 py-1 rounded-lg transition">수정</button>
+                <button onclick="deleteBias('${b.id}')" class="text-[11px] font-bold text-slate-400 hover:text-rose-500 px-1.5 py-1 rounded-lg transition">삭제</button>
+              </div>
             </div>
 
             <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/70">
@@ -975,6 +1010,29 @@
     }
 
     function openBiasModal() {
+      document.getElementById('biasModalTitle').textContent = '💖 최애 프로필 등록';
+      document.getElementById('editBiasId').value = '';
+      ['biasNameInput', 'biasGroupInput', 'biasNickInput', 'biasBirthInput', 'biasDebutInput', 'biasFileInput'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      document.getElementById('biasModal').classList.remove('hidden');
+      document.getElementById('biasModal').classList.add('flex');
+    }
+
+    function openEditBiasModal(id) {
+      const bias = state.biases.find(b => b.id === id);
+      if (!bias) return;
+
+      document.getElementById('biasModalTitle').textContent = '✏️ 최애 프로필 수정';
+      document.getElementById('editBiasId').value = bias.id;
+      document.getElementById('biasNameInput').value = bias.name || '';
+      document.getElementById('biasGroupInput').value = bias.group || '';
+      document.getElementById('biasNickInput').value = bias.nickname || '';
+      document.getElementById('biasBirthInput').value = bias.birthday || '';
+      document.getElementById('biasDebutInput').value = bias.debutDate || '';
+      document.getElementById('biasFileInput').value = '';
+
       document.getElementById('biasModal').classList.remove('hidden');
       document.getElementById('biasModal').classList.add('flex');
     }
@@ -985,6 +1043,7 @@
     }
 
     function saveBias() {
+      const editId = document.getElementById('editBiasId').value;
       const name = document.getElementById('biasNameInput').value.trim();
       const group = document.getElementById('biasGroupInput').value.trim();
       if (!name) {
@@ -996,41 +1055,71 @@
       if (fileInput.files && fileInput.files[0]) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          finishSavingBias(name, group, e.target.result);
+          finishSavingBias(editId, name, group, e.target.result);
         };
         reader.readAsDataURL(fileInput.files[0]);
       } else {
-        finishSavingBias(name, group, '');
+        finishSavingBias(editId, name, group, null);
       }
     }
 
-    function finishSavingBias(name, group, photoUrl) {
-      state.biases.push({
-        id: 'b_' + Date.now(),
-        name,
-        group,
-        nickname: document.getElementById('biasNickInput').value.trim(),
-        birthday: document.getElementById('biasBirthInput').value,
-        debutDate: document.getElementById('biasDebutInput').value,
-        photo: photoUrl
-      });
+    function finishSavingBias(editId, name, group, newPhotoUrl) {
+      const nickname = document.getElementById('biasNickInput').value.trim();
+      const birthday = document.getElementById('biasBirthInput').value;
+      const debutDate = document.getElementById('biasDebutInput').value;
 
-      const fullName = group ? `${name} (${group})` : name;
-      state.rankings.unshift({
-        id: 'r_bias_' + Date.now(),
-        name: fullName,
-        score: 50
-      });
+      if (editId) {
+        const idx = state.biases.findIndex(b => b.id === editId);
+        if (idx !== -1) {
+          const oldBias = state.biases[idx];
+          const oldFullName = oldBias.group ? `${oldBias.name} (${oldBias.group})` : oldBias.name;
+          const newFullName = group ? `${name} (${group})` : name;
+
+          state.biases[idx] = {
+            ...oldBias,
+            name,
+            group,
+            nickname,
+            birthday,
+            debutDate,
+            photo: newPhotoUrl !== null ? newPhotoUrl : oldBias.photo
+          };
+
+          const rankItem = state.rankings.find(r => r.name === oldFullName);
+          if (rankItem) {
+            rankItem.name = newFullName;
+          }
+        }
+        showToast(`${name} 프로필이 수정되었습니다! ✏️`);
+      } else {
+        state.biases.push({
+          id: 'b_' + Date.now(),
+          name,
+          group,
+          nickname,
+          birthday,
+          debutDate,
+          photo: newPhotoUrl || ''
+        });
+
+        const fullName = group ? `${name} (${group})` : name;
+        state.rankings.unshift({
+          id: 'r_bias_' + Date.now(),
+          name: fullName,
+          score: 50
+        });
+        showToast(`${name} 프로필 등록 및 랭킹 자동 연동 완료! 💖`);
+      }
 
       ['biasNameInput', 'biasGroupInput', 'biasNickInput', 'biasBirthInput', 'biasDebutInput', 'biasFileInput'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
+      document.getElementById('editBiasId').value = '';
 
       saveState();
       closeBiasModal();
       renderAll();
-      showToast(`${name} 프로필 등록 및 랭킹 자동 연동 완료! 💖`);
     }
 
     function deleteBias(id) {
