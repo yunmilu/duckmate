@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>DUCKMATE (덕메이트) - 나만의 팬덤 앱</title>
+  <title>DUCKMATE (덕메이트) - 나만의 덕질관리 앱</title>
+
+  <!-- PWA Manifest 및 깃허브 icon-192.png 연동 -->
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <meta name="theme-color" content="#0ea5e9" />
 
   <!-- Tailwind CSS & Pretendard Font -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -44,7 +50,8 @@
     <header class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 px-4 pt-3 pb-2.5">
       <div class="flex items-center justify-between mb-2.5">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-400 via-orange-400 to-pink-500 flex items-center justify-center text-base shadow-xs text-white font-extrabold">🦆</div>
+          <img src="./icon-192.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="DUCKZ 로고" class="w-8 h-8 rounded-xl object-cover shadow-xs" />
+          <div style="display:none;" class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-400 via-orange-400 to-pink-500 items-center justify-center text-base shadow-xs text-white font-extrabold">🦆</div>
           <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">DUCKZ</h1>
         </div>
 
@@ -110,7 +117,7 @@
           </div>
         </div>
 
-        <!-- 홈 화면 전용 일일 덕질 퀘스트 패널 (최대 2개 노출 + 더보기 화살표 버튼) -->
+        <!-- 홈 화면 전용 일일 덕질 퀘스트 패널 -->
         <div id="homeMissionSection" class="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl p-4 text-white shadow-sm space-y-3">
           <div class="flex items-center justify-between">
             <div>
@@ -119,10 +126,8 @@
             </div>
           </div>
           
-          <!-- 미션 목록 컨테이너 -->
           <div id="missionList" class="space-y-2 pt-1"></div>
 
-          <!-- 퀘스트 더보기 / 접기 토글 버튼 -->
           <button onclick="toggleMissionExpand()" id="missionToggleBtn" class="w-full py-2 bg-black/20 hover:bg-black/30 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5 mt-2">
             <span id="missionToggleText">나머지 퀘스트 더보기 (4개 더)</span>
             <span id="missionToggleArrow" class="transform transition-transform duration-200">▼</span>
@@ -362,7 +367,8 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'duckz_fandom_app_v12';
+    // 새로운 프로필 업데이트 반영을 위해 스토리지 키 최신화
+    const STORAGE_KEY = 'duckz_fandom_app_v13';
 
     const DEFAULT_MISSIONS = [
       { id: 'm1', title: '최애 직캠 1편 정주행하기', reward: 20, completedDate: null },
@@ -499,7 +505,13 @@
 
     function getInitialBiases() {
       return [{
-        id: 'b1', name: '장원영', group: 'IVE', nickname: '럭키비키', birthday: '2004-08-31', debutDate: '2021-12-01', photo: ''
+        id: 'b1',
+        name: '장원영',
+        group: 'IVE',
+        nickname: '럭키비키',
+        birthday: '2004-08-31',
+        debutDate: '2021-12-01',
+        photo: './icon-192.png'
       }];
     }
 
@@ -664,7 +676,7 @@
       } else {
         const b = state.biases[0];
         const avatar = b.photo
-          ? `<img src="${b.photo}" onerror="this.style.display='none'" onclick="openPhotoZoomByBiasId('${b.id}')" class="w-12 h-12 rounded-2xl object-cover border-2 border-white/40 cursor-pointer hover:opacity-95 transition" />`
+          ? `<img src="${b.photo}" onerror="this.src='./icon-192.png'" onclick="openPhotoZoomByBiasId('${b.id}')" class="w-12 h-12 rounded-2xl object-cover border-2 border-white/40 cursor-pointer hover:opacity-95 transition" />`
           : `<div onclick="openPhotoZoomByBiasId('${b.id}')" class="w-12 h-12 rounded-2xl bg-white/25 font-extrabold text-lg flex items-center justify-center cursor-pointer">${b.name.charAt(0)}</div>`;
         mainBiasBox.innerHTML = `
           <div class="flex items-center gap-3">
@@ -701,7 +713,6 @@
       renderMissions();
     }
 
-    // ==================== 일일 퀘스트 더보기/접기 토글 기능 ====================
     function toggleMissionExpand() {
       isMissionExpanded = !isMissionExpanded;
       renderMissions();
@@ -760,15 +771,11 @@
       showToast(`퀘스트 완료! +${mission.reward}P 획득 🎉`);
     }
 
-    // ==================== 최애 사진 크게 보기 기능 ====================
     function openPhotoZoomByBiasId(biasId) {
       const bias = state.biases.find(b => b.id === biasId);
       if (!bias) return;
-      if (!bias.photo) {
-        showToast('등록된 프로필 사진이 없습니다. [수정] 버튼으로 사진을 추가해보세요!');
-        return;
-      }
-      openPhotoZoom(bias.photo, `${bias.name}${bias.group ? ' (' + bias.group + ')' : ''}`, bias.nickname ? `애칭: ${bias.nickname}` : '');
+      const targetUrl = bias.photo || './icon-192.png';
+      openPhotoZoom(targetUrl, `${bias.name}${bias.group ? ' (' + bias.group + ')' : ''}`, bias.nickname ? `애칭: ${bias.nickname}` : '');
     }
 
     function openPhotoZoomByAlbumId(albumId) {
@@ -806,7 +813,6 @@
       modal.classList.remove('flex');
     }
 
-    // ==================== 앨범 저장소 카테고리 ====================
     function addPhotoToAlbum() {
       const titleInput = document.getElementById('albumTitleInput');
       const fileInput = document.getElementById('albumFileInput');
@@ -867,7 +873,6 @@
       }
     }
 
-    // ==================== 랜덤뽑기 카테고리 ====================
     const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
     function cleanOldDraws() {
       const now = Date.now();
@@ -956,7 +961,6 @@
       showToast(`[${rarity}] ${randomPhoto.title} 포카 뽑기 성공! (+5P) ✨`);
     }
 
-    // ==================== 최애 프로필 설정 (수정 및 사진 보기 지원) ====================
     function renderBiases() {
       const list = document.getElementById('biasList');
       if (!list) return;
@@ -966,9 +970,8 @@
       }
 
       list.innerHTML = state.biases.map((b, idx) => {
-        const avatarHtml = b.photo
-          ? `<img src="${b.photo}" onerror="this.outerHTML=\`${getInitialAvatar(b.name, 'w-14 h-14 text-lg').replace(/"/g, '&quot;')}\`" class="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-xs ring-2 ring-sky-400/40" />`
-          : `${getInitialAvatar(b.name, 'w-14 h-14 text-lg')}`;
+        const photoSrc = b.photo || './icon-192.png';
+        const avatarHtml = `<img src="${photoSrc}" onerror="this.outerHTML=\`${getInitialAvatar(b.name, 'w-14 h-14 text-lg').replace(/"/g, '&quot;')}\`" class="w-14 h-14 rounded-2xl object-cover shrink-0 shadow-xs ring-2 ring-sky-400/40" />`;
 
         return `
           <div onclick="openPhotoZoomByBiasId('${b.id}')" class="bg-white dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400/80 rounded-2xl p-4 shadow-xs cursor-pointer transition">
@@ -1099,7 +1102,7 @@
           nickname,
           birthday,
           debutDate,
-          photo: newPhotoUrl || ''
+          photo: newPhotoUrl || './icon-192.png'
         });
 
         const fullName = group ? `${name} (${group})` : name;
@@ -1129,7 +1132,6 @@
       showToast('최애 프로필이 삭제되었습니다.');
     }
 
-    // ==================== 랭킹 시스템 ====================
     function renderRankings() {
       const sorted = [...state.rankings].sort((a, b) => b.score - a.score);
       const box = document.getElementById('rankingList');
@@ -1183,7 +1185,6 @@
       showToast(`${target.name} 응원 완료! (-10P 차감) 💙`);
     }
 
-    // ==================== 일정 및 일기 ====================
     function addSchedule() {
       const title = document.getElementById('schedTitle').value.trim();
       const date = document.getElementById('schedDate').value;
@@ -1257,7 +1258,6 @@
       `).join('');
     }
 
-    // ==================== 덕질 유형 테스트 ====================
     function renderTest() {
       const container = document.getElementById('testContainer');
       const badge = document.getElementById('testProgressBadge');
@@ -1315,7 +1315,6 @@
       renderTest();
     }
 
-    // ==================== 유튜브 플레이리스트 ====================
     function togglePlaylistForm() {
       document.getElementById('playlistForm').classList.toggle('hidden');
     }
