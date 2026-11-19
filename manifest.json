@@ -1,6 +1,6 @@
 {
-"name": "DUCKMATE (덕메이트) - 나만의 팬덤 앱",
-"short_name": "DUCKMATE",
+"name": "DUCKZ (덕즈) - 나만의 덕질관리 앱",
+"short_name": "DUCKZ",
 "description": "최애 프로필, 일일 퀘스트, 응원 랭킹, 포토카드 앨범까지 한 번에 즐기는 팬덤 앱",
 "start_url": "./index.html",
 "display": "standalone",
