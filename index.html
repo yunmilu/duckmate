@@ -30,12 +30,12 @@
 
   <style>
     * { -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Pretendard', sans-serif; }
+    body { font-family: 'Pretendard', sans-serif; overscroll-behavior-x: none; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
     @keyframes popIn {
-      0% { transform: scale(0.95); opacity: 0; }
+      0% { transform: scale(0.96); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
     .animate-pop { animation: popIn 0.2s ease-out forwards; }
@@ -43,8 +43,8 @@
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex justify-center transition-colors duration-200">
 
-  <!-- 모바일 프레임 컨테이너 -->
-  <div class="w-full max-w-[430px] bg-white dark:bg-slate-900 min-h-screen shadow-2xl flex flex-col relative overflow-x-hidden border-x border-slate-200/70 dark:border-slate-800">
+  <!-- 모바일 프레임 컨테이너 (전체 스와이프 영역) -->
+  <div id="appContainer" class="w-full max-w-[430px] bg-white dark:bg-slate-900 min-h-screen shadow-2xl flex flex-col relative overflow-x-hidden border-x border-slate-200/70 dark:border-slate-800">
 
     <!-- 상단 헤더 -->
     <header class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 px-4 pt-3 pb-2.5">
@@ -85,7 +85,7 @@
     <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 dark:bg-slate-100/95 text-white dark:text-slate-900 text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg pointer-events-none opacity-0 transition-opacity duration-200 whitespace-nowrap"></div>
 
     <!-- 메인 콘텐츠 영역 -->
-    <main id="mainSwipeArea" class="flex-1 p-4 space-y-4 pb-6 touch-pan-y">
+    <main id="mainSwipeArea" class="flex-1 p-4 space-y-4 pb-6">
 
       <!-- ==================== 1. 홈 탭 ==================== -->
       <section id="tab-home" class="tab-section space-y-4 animate-pop">
@@ -367,8 +367,7 @@
   </div>
 
   <script>
-    // 새로운 프로필 업데이트 반영을 위해 스토리지 키 최신화
-    const STORAGE_KEY = 'duckz_fandom_app_v13';
+    const STORAGE_KEY = 'duckz_fandom_app_v14';
 
     const DEFAULT_MISSIONS = [
       { id: 'm1', title: '최애 직캠 1편 정주행하기', reward: 20, completedDate: null },
@@ -674,32 +673,36 @@
     let touchStartX = 0;
     let touchStartY = 0;
 
-    const mainSwipeArea = document.getElementById('mainSwipeArea');
-    if (mainSwipeArea) {
-      mainSwipeArea.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
+    const appContainer = document.getElementById('appContainer');
+    if (appContainer) {
+      appContainer.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
       }, { passive: true });
 
-      mainSwipeArea.addEventListener('touchend', (e) => {
-        // 가로 스크롤 영역(포토카드 컬렉션 등) 내부 스와이프는 탭 이동에서 제외
-        if (e.target.closest('.overflow-x-auto')) return;
+      appContainer.addEventListener('touchend', (e) => {
+        if (!e.changedTouches || e.changedTouches.length !== 1) return;
+        // 모달 열려있거나 가로 스크롤 리스트, 입력창 터치 시 제외
+        if (!document.getElementById('biasModal').classList.contains('hidden')) return;
+        if (!document.getElementById('photoZoomModal').classList.contains('hidden')) return;
+        if (e.target.closest('.overflow-x-auto') || e.target.closest('input, textarea, select')) return;
 
-        const touchEndX = e.changedTouches[0].screenX;
-        const touchEndY = e.changedTouches[0].screenY;
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
         const diffX = touchEndX - touchStartX;
         const diffY = touchEndY - touchStartY;
 
-        // 수직 스크롤보다 수평 이동이 크고, 최소 60px 이상 스와이프했을 때 동작
-        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
+        // 수직 스크롤보다 수평 슬라이딩이 크고 45px 이상 움직였을 때 탭 전환
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 45) {
           const currentIndex = TAB_ORDER.indexOf(currentTab);
           if (currentIndex === -1) return;
 
           if (diffX > 0 && currentIndex < TAB_ORDER.length - 1) {
-            // 손가락을 오른쪽으로 슬라이딩 -> 다음 탭으로 이동
+            // 손가락을 오른쪽으로 슬라이딩 -> 다음 탭
             switchTab(TAB_ORDER[currentIndex + 1]);
           } else if (diffX < 0 && currentIndex > 0) {
-            // 손가락을 왼쪽으로 슬라이딩 -> 이전 탭으로 이동
+            // 손가락을 왼쪽으로 슬라이딩 -> 이전 탭
             switchTab(TAB_ORDER[currentIndex - 1]);
           }
         }
