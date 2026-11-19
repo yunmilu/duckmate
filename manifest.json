@@ -1,15 +1,18 @@
 {
-  "name": "DUCKZ (덕즈)",
-  "short_name": "DUCKZ",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#38bdf8",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
-  ]
+"name": "DUCKMATE (덕메이트) - 나만의 팬덤 앱",
+"short_name": "DUCKMATE",
+"description": "최애 프로필, 일일 퀘스트, 응원 랭킹, 포토카드 앨범까지 한 번에 즐기는 팬덤 앱",
+"start_url": "./index.html",
+"display": "standalone",
+"background_color": "#ffffff",
+"theme_color": "#0ea5e9",
+"orientation": "portrait",
+"icons": [
+{
+"src": "./icon-192.png",
+"sizes": "192x192",
+"type": "image/png",
+"purpose": "any maskable"
+}
+]
 }
