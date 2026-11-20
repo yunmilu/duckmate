@@ -698,12 +698,10 @@
           const currentIndex = TAB_ORDER.indexOf(currentTab);
           if (currentIndex === -1) return;
 
-          if (diffX > 0 && currentIndex < TAB_ORDER.length - 1) {
-            // 손가락을 오른쪽으로 슬라이딩 -> 다음 탭
-            switchTab(TAB_ORDER[currentIndex + 1]);
-          } else if (diffX < 0 && currentIndex > 0) {
-            // 손가락을 왼쪽으로 슬라이딩 -> 이전 탭
-            switchTab(TAB_ORDER[currentIndex - 1]);
+          if (diffX < 0) {
+            // 손가락을 왼쪽으로 슬라이딩할 때 다음 탭으로 이동 (마지막 탭에서는 첫 탭으로 순환)
+            const nextIndex = (currentIndex + 1) % TAB_ORDER.length;
+            switchTab(TAB_ORDER[nextIndex]);
           }
         }
       }, { passive: true });
