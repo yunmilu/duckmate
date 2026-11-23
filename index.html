@@ -176,13 +176,13 @@
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-base font-extrabold">📁 앨범 저장소</h2>
-              <p class="text-xs text-indigo-100">나만의 최애 사진을 자유롭게 저장하고 보관하세요!</p>
+              <p class="text-xs text-indigo-100">나의 최애 사진을 자유롭게 저장하고 보관하세요!</p>
             </div>
           </div>
 
           <div class="bg-white/10 p-3.5 rounded-xl border border-white/20 space-y-2.5">
             <div class="text-xs font-bold">➕ 새 사진 저장하기</div>
-            <input id="albumTitleInput" type="text" placeholder="사진 제목 (예: 콘서트 레전드 엔딩요정)" class="w-full text-xs bg-black/20 text-white placeholder-indigo-200 border border-white/30 rounded-xl px-3 py-2 outline-none" />
+            <input id="albumTitleInput" type="text" placeholder="사진 제목 (예: 올콘 레전드 사진)" class="w-full text-xs bg-black/20 text-white placeholder-indigo-200 border border-white/30 rounded-xl px-3 py-2 outline-none" />
             <div class="flex gap-2">
               <input id="albumFileInput" type="file" accept="image/*" class="flex-1 text-xs text-indigo-100 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white file:text-indigo-600 hover:file:bg-indigo-50 cursor-pointer" />
               <button onclick="addPhotoToAlbum()" class="bg-white text-indigo-600 font-extrabold text-xs px-4 py-2 rounded-xl shrink-0 shadow hover:bg-indigo-50 active:scale-95 transition">사진 저장</button>
@@ -207,7 +207,7 @@
               <h2 class="text-base font-extrabold">✨ 포토카드 랜덤 뽑기</h2>
               <p class="text-xs text-purple-100">앨범에 저장된 사진들 중에서 랜덤으로 포카가 나와요!</p>
             </div>
-            <span id="drawRemainingBadge" class="text-[11px] font-bold bg-white/20 px-2.5 py-1 rounded-full shrink-0">남은 횟수: 3/3</span>
+            <span id="drawRemainingBadge" class="text-[11px] font-bold bg-white/20 px-2.5 py-1 rounded-full shrink-0">남은 횟수: 4/4 </span>
           </div>
 
           <button id="drawCardBtn" onclick="drawCustomPhotoCard()" class="w-full bg-white text-purple-700 font-extrabold text-xs py-3.5 rounded-xl shadow-md hover:bg-purple-50 active:scale-[0.99] transition">
@@ -321,16 +321,16 @@
       <div class="space-y-2.5 text-xs">
         <div>
           <label class="block font-bold mb-1">이름 / 활동명 *</label>
-          <input id="biasNameInput" type="text" placeholder="예: 장원영" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
+          <input id="biasNameInput" type="text" placeholder="예: 김석진" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block font-bold mb-1">그룹명</label>
-            <input id="biasGroupInput" type="text" placeholder="예: IVE" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
+            <input id="biasGroupInput" type="text" placeholder="예: BTS" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
           </div>
           <div>
             <label class="block font-bold mb-1">애칭 / 별명</label>
-            <input id="biasNickInput" type="text" placeholder="예: 럭키비키" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
+            <input id="biasNickInput" type="text" placeholder="예: 햄찌" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 outline-none" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-2">
@@ -505,18 +505,18 @@
     function getInitialBiases() {
       return [{
         id: 'b1',
-        name: '장원영',
-        group: 'IVE',
-        nickname: '럭키비키',
-        birthday: '2004-08-31',
-        debutDate: '2021-12-01',
+        name: '김석진',
+        group: 'BTS',
+        nickname: '햄찌',
+        birthday: '1992-12-04',
+        debutDate: '2013-06-13',
         photo: './icon-192.png'
       }];
     }
 
     function getInitialRankings() {
       return [
-        { id: 'r_bias_1', name: '장원영 (IVE)', score: 200 },
+        { id: 'r_bias_1', name: '방탄소년단 (BTS)', score: 200 },
         { id: 'r2', name: 'aespa (에스파)', score: 130 },
         { id: 'r3', name: 'ZEROBASEONE', score: 110 }
       ];
